@@ -8,7 +8,6 @@ lockFile="$repoRoot/skills-lock.json"
 targetRoots=(
   "$HOME/.agents/skills"
   "$HOME/.claude/skills"
-  "$HOME/.codex/skills"
 )
 
 shopt -s nullglob
@@ -116,4 +115,4 @@ if ((conflicts)); then
   exit 1
 fi
 
-echo "Linked ${#skillNames[@]} skills for shared agents, Codex, and Claude Code."
+echo "Linked ${#skillNames[@]} skills for shared agents (including Codex) and Claude Code."

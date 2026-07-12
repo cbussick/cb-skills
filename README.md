@@ -1,24 +1,23 @@
 # CB Skills
 
 The coding-agent skills I use across machines. This repository is the source of
-truth for both Codex and Claude Code.
+truth for agents that respect `.agents` (including Codex) and Claude Code.
 
-Third-party skills are managed by the Skills CLI and recorded in
-`skills-lock.json`. Repository-owned skills remain committed here.
+Third-party skills are managed by the [Skills CLI](https://github.com/vercel-labs/skills) and recorded in
+`skills-lock.json`. My own skills (and vendored skills if necessary) remain committed here.
 
 ## Install
 
-Restore third-party skills, then create the global links:
-
 ```bash
+# 1. Install third-party skills into this repo:
 npx --yes skills@latest experimental_install
+# 2. Then create the global symlinks for the agents:
 ./scripts/install.sh
 ```
 
 The installer creates one symlink per skill in:
 
 - `~/.agents/skills`
-- `~/.codex/skills`
 - `~/.claude/skills`
 
 It refuses to overwrite a real file or directory. Existing symlinks are updated
