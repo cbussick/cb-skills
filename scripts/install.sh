@@ -5,8 +5,8 @@ set -euo pipefail
 repoRoot=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 targetRoots=(
   "$HOME/.agents/skills"
-  "$HOME/.codex/skills"
   "$HOME/.claude/skills"
+  "$HOME/.codex/skills"
 )
 
 shopt -s nullglob
