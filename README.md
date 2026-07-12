@@ -24,12 +24,12 @@ It refuses to overwrite a real file or directory. Existing symlinks are updated
 to point at this checkout, and obsolete symlinks owned by this checkout are
 removed.
 
-## Add or update third-party skills
+## Add new third-party skills or update them
 
 Run project-scoped Skills CLI commands from this repository:
 
 ```bash
-npx --yes skills@latest add owner/repository --skill skill-name --agent codex -y
+npx --yes skills@latest add <owner>/<repository> --skill skill-name -y
 npx --yes skills@latest update -p
 ```
 
