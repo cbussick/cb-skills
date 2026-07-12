@@ -45,6 +45,12 @@ Source: <https://github.com/anthropics/skills>
 
 - `frontend-design`
 
+## dmmulroy/.dotfiles
+
+Source: <https://github.com/dmmulroy/.dotfiles/tree/main/home/.agents/skills/bro>
+
+- `bro`
+
 ## emilkowalski/skills
 
 Source: <https://github.com/emilkowalski/skills>
