@@ -1,0 +1,4 @@
+interface:
+  display_name: "tldraw Offline for WSL"
+  short_description: "Bridge WSL agents to tldraw Offline"
+  default_prompt: "Use $tldraw-offline-wsl to inspect and update my open tldraw canvas from WSL."

@@ -44,3 +44,5 @@ checkout.
 ## Repository-owned skills
 
 - `codex-plan-review` is maintained in this repository.
+- `tldraw-offline-wsl` bridges WSL agents to the official skill installed by
+  tldraw Offline on Windows.
