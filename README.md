@@ -33,6 +33,17 @@ npx --yes skills@latest add <owner>/<repository> --skill skill-name -y
 npx --yes skills@latest update -p
 ```
 
+After adding or removing a skill, rerun the installer to create or clean up its
+global symlinks:
+
+```bash
+./scripts/install.sh
+```
+
+Updating an existing skill does not require rerunning the installer because its
+symlinks already point into this checkout. Start a new agent session after
+adding a skill so the agent discovers it.
+
 Review installed skills before using them, then commit the updated
 `skills-lock.json`. Files under `.agents/skills` are installed dependencies and
 are intentionally ignored by Git.
