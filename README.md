@@ -1,17 +1,20 @@
 # CB Skills
 
-The coding-agent skills I use across machines. This repository is the source of
-truth for agents that respect `.agents` (including Codex) and Claude Code.
+The shared coding-agent skills I use across machines. This repository is the
+source of truth for Codex, Claude Code, and other agents that support `.agents`.
 
-Third-party skills are managed by the [Skills CLI](https://github.com/vercel-labs/skills) and recorded in
-`skills-lock.json`. My own skills (and vendored skills if necessary) remain committed here.
+Third-party skills are managed by the
+[Skills CLI](https://github.com/vercel-labs/skills) and recorded in
+`skills-lock.json`. Repository-owned skills live in top-level directories
+containing a `SKILL.md`.
 
 ## Install
 
 ```bash
-# 1. Install third-party skills into this repo:
+# 1. Install third-party skills into .agents/skills based on `skills-lock.json`:
 npx --yes skills@latest experimental_install
-# 2. Then create the global symlinks for the agents:
+
+# 2. Create global symlinks for the agents:
 ./scripts/install.sh
 ```
 
@@ -24,25 +27,26 @@ It refuses to overwrite a real file or directory. Existing symlinks are updated
 to point at this checkout, and obsolete symlinks owned by this checkout are
 removed.
 
-## Add new third-party skills or update them
+Start a new agent session after adding a skill so the agent discovers it.
+
+## Manage third-party skills
 
 Run project-scoped Skills CLI commands from this repository:
 
 ```bash
-npx --yes skills@latest add <owner>/<repository> --skill skill-name -y
+# Add:
+npx --yes skills@latest add <owner>/<repository> --skill <skill-name> -y
+
+# Update:
 npx --yes skills@latest update -p
+
+# Remove:
+npx --yes skills@latest remove <skill-name> -y
 ```
 
-After adding or removing a skill, rerun the installer to create or clean up its
-global symlinks:
-
-```bash
-./scripts/install.sh
-```
-
-Updating an existing skill does not require rerunning the installer because its
-symlinks already point into this checkout. Start a new agent session after
-adding a skill so the agent discovers it.
+After adding or removing a skill, rerun `./scripts/install.sh` to create or
+clean up its global symlinks. Updating an existing skill does not require this
+because its symlinks already point into the checkout.
 
 Review installed skills before using them, then commit the updated
 `skills-lock.json`. Files under `.agents/skills` are installed dependencies and
@@ -52,8 +56,8 @@ Do not use global add, update, or remove commands for this collection. Global
 commands manage the same directories that `scripts/install.sh` links to this
 checkout.
 
-## Repository-owned skills
+## Manage repository-owned skills
 
-- `codex-plan-review` is maintained in this repository.
-- `tldraw-offline-wsl` bridges WSL agents to the official skill installed by
-  tldraw Offline on Windows.
+Add or edit repository-owned skills as top-level directories containing a
+`SKILL.md`, and commit them normally. After adding or removing one, rerun
+`./scripts/install.sh`.
