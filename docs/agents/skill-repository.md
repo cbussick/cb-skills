@@ -15,6 +15,10 @@ behavior.
 
 - Run Skills CLI add, update, and restore commands from this repository so
   changes are recorded in `skills-lock.json`.
+- After updates, follow the root README's
+  [new-skill check](../../README.md#check-for-new-skills) when a source
+  announces changes or during periodic maintenance. Updates refresh the locked
+  skills; this separate check finds new and renamed skills.
 - Do not use global Skills CLI add, update, or remove commands for this
   collection. They operate on the same global directories managed by this
   repository's installer.

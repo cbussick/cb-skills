@@ -1,63 +1,82 @@
 # CB Skills
 
-The shared coding-agent skills I use across machines. This repository is the
-source of truth for Codex, Claude Code, and other agents that support `.agents`.
+This repo holds the coding-agent skills I use on all my machines. It makes the
+same skills available to Codex, Claude Code, and other agents that support the
+`.agents` folder.
 
-Third-party skills are managed by the
-[Skills CLI](https://github.com/vercel-labs/skills) and recorded in
-`skills-lock.json`. Repository-owned skills live in top-level directories
-containing a `SKILL.md`.
+Skills from other repos are installed with the
+[Skills CLI](https://github.com/vercel-labs/skills). The installed list is saved
+in `skills-lock.json`. Skills maintained in this repo live in top-level folders
+that contain a `SKILL.md` file.
 
-## Install
+## Set up
 
 ```bash
-# 1. Install third-party skills into .agents/skills based on `skills-lock.json`:
+# 1. Download the skills listed in skills-lock.json:
 npx --yes skills@latest experimental_install
 
-# 2. Create global symlinks for the agents:
+# 2. Make every skill available to the agents on this machine:
 ./scripts/install.sh
 ```
 
-The installer creates one symlink per skill in:
+The installer adds symlinks in:
 
 - `~/.agents/skills`
 - `~/.claude/skills`
 
-It refuses to overwrite a real file or directory. Existing symlinks are updated
-to point at this checkout, and obsolete symlinks owned by this checkout are
-removed.
+It never replaces a real file or folder. It updates links it created and
+removes its links to skills that are no longer in this repo.
 
-Start a new agent session after adding a skill so the agent discovers it.
+Start a new agent session after adding a skill so the agent can find it.
 
-## Manage third-party skills
+## Add, update, or remove skills from other repos
 
-Run project-scoped Skills CLI commands from this repository:
+Run these commands from this repo so they update `skills-lock.json`:
 
 ```bash
-# Add:
+# Add one skill:
 npx --yes skills@latest add <owner>/<repository> --skill <skill-name> -y
 
-# Update:
+# Update the skills already listed in skills-lock.json:
 npx --yes skills@latest update -p
 
-# Remove:
+# Remove one skill:
 npx --yes skills@latest remove <skill-name> -y
 ```
 
-After adding or removing a skill, rerun `./scripts/install.sh` to create or
-clean up its global symlinks. Updating an existing skill does not require this
-because its symlinks already point into the checkout.
+After adding or removing a skill, run `./scripts/install.sh` again. You do not
+need to run it after an update because the existing links still work.
 
-Review installed skills before using them, then commit the updated
-`skills-lock.json`. Files under `.agents/skills` are installed dependencies and
-are intentionally ignored by Git.
+Review downloaded skills before using them. Commit the changed
+`skills-lock.json`. Git ignores the downloaded files in `.agents/skills` and
+the generated links in `.claude/skills`.
 
-Do not use global add, update, or remove commands for this collection. Global
-commands manage the same directories that `scripts/install.sh` links to this
-checkout.
+Use the commands above without `-g`. Global commands write into the same
+folders managed by `install.sh` and can conflict with its links.
 
-## Manage repository-owned skills
+### Check for new skills
 
-Add or edit repository-owned skills as top-level directories containing a
-`SKILL.md`, and commit them normally. After adding or removing one, rerun
+The update command only knows about skills already listed in
+`skills-lock.json`. It downloads changes to those skills and may ask to remove
+one that disappeared. It does not add a new skill. If a skill was renamed, you
+must add the new name yourself.
+
+Git tags and release numbers do not change this behavior. The lock file tracks
+each selected skill and its contents, not a version of the whole repo. It cannot
+follow a rule such as "stay on compatible version 1 releases."
+
+To see every skill currently offered by a source repo without installing
+anything, run:
+
+```bash
+npx --yes skills@latest add <owner>/<repository> --list
+```
+
+Compare that list with `skills-lock.json`, then add any new or renamed skills
+you want.
+
+## Skills maintained in this repo
+
+These skills live in top-level folders containing a `SKILL.md` file. Edit and
+commit them like any other files. After adding or removing one, run
 `./scripts/install.sh`.
