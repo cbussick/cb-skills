@@ -146,6 +146,12 @@
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "ad03e8d4ea3cbbff66420eb7ba3cc375b5cbe1821a2449b53e863256cf5b5cde"
     },
+    "img2threejs": {
+      "source": "img2threejs/img2threejs",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "f516b4a1803f9c39bd375cb0f478e3c2b939abeb11ea6e8e48d710448a7bdf9f"
+    },
     "implement": {
       "source": "mattpocock/skills",
       "sourceType": "github",
