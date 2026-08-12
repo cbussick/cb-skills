@@ -26,6 +26,20 @@ The adapter discovers the Windows profile, current API port, and per-launch
 token on every call. Never print the token or the contents of `server.json`.
 Never edit an open `.tldraw` archive directly.
 
+## Untitled canvas safety
+
+Inspect the target document before every canvas mutation. When `filePath` is
+`null`, treat the document as untitled and in-memory only:
+
+- Omit `helpers.saveDoc()` from every `/exec` call.
+- Leave saving to the user in the tldraw app.
+- Report that the canvas is unsaved after the edit.
+
+Call `helpers.saveDoc()` only when the document is locally owned and
+`filePath` is non-null. This prevents an agent from opening a Save File dialog
+that the user did not request and avoids losing unsaved work if that dialog is
+canceled.
+
 ## Request examples
 
 Read live API documentation:
