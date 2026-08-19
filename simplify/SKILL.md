@@ -13,4 +13,4 @@ Review your complete body of work from this task, in this same context window, a
 
 Stay on this task's work. Keep the same behavior. Stop when the work is already clean.
 
-Say what you changed and what you left.
+Report back what you changed.
