@@ -1,13 +1,12 @@
 ---
 name: talk-to-agent
-description: Talk to a coding agent running in another Herdr pane, tab, or session, whatever its vendor, by routing through the herdr CLI. Use when asked to talk to, message, ask, or relay something to "the other agent", "the agent", "the other session", or "the agent in the other tab", and when asked what another agent is working on or what it replied. Requires HERDR_ENV=1.
+description: Talk to a coding agent running in another Herdr pane, tab, or session, including an agent reached through an existing SSH terminal. Use when asked to message, question, or read a reply from "the other agent," "the other session," or an agent in another pane or tab. Requires HERDR_ENV=1.
 ---
 
 # Talk to Another Agent
 
-Herdr is the transport. It recognizes the agent occupying each pane and drives
-it through the terminal, so one command reaches Claude Code, Codex, Cursor, Pi,
-or any other harness Herdr detects.
+Herdr is the transport. It can address a recognized agent directly or operate
+the terminal pane that contains an agent hidden behind SSH.
 
 ## Confirm the transport
 
@@ -18,59 +17,94 @@ test "${HERDR_ENV:-}" = 1
 If the check fails, tell the user this session is not running inside a Herdr
 pane and stop.
 
-Route every message through the `herdr` CLI. A harness's own peer channel —
-Claude Code's `SendMessage`, and the equivalent in other harnesses — reaches
-only sessions of that same vendor and cannot see the rest of the workspace.
-Use `herdr` even when the target happens to be the same kind of agent as you.
+Route every message through the `herdr` CLI. A harness's own peer channel
+reaches only sessions of that harness and cannot see the rest of the workspace.
 
-## Pick the target
+## Resolve one target
 
 ```bash
+herdr workspace list
+herdr tab list --workspace "$HERDR_WORKSPACE_ID"
+herdr pane list --workspace "$HERDR_WORKSPACE_ID"
 herdr agent list
 ```
 
-Each entry carries `pane_id`, `agent` kind, `agent_status`, `cwd`, and
-`terminal_title_stripped`. Match the user's words against those fields. Target
-by pane ID or by a unique live agent name; terminal IDs and bare kind labels
-are not targets. When more than one agent fits the description, ask the user
-which one before sending.
+Match the user's description against workspace and tab labels, pane and tab
+IDs, agent kind and status, working directory, and terminal title. A tab label
+identifies a tab, so map its tab ID to the pane before sending.
 
-## Send and read the reply
+Stay in the current workspace unless the user explicitly names another one.
+The target must resolve uniquely. When multiple panes fit, ask the user which
+one they mean before sending. Do not probe candidates with messages.
+
+## Choose the transport
+
+### Recognized agent
+
+When `herdr agent list` associates the target pane with an agent, use the agent
+interface:
 
 ```bash
 herdr agent prompt <target> "<message>" --wait --timeout 120000
 herdr agent read <target> --source recent-unwrapped --lines 120
 ```
 
-`agent prompt` returns pane metadata only — the reply itself comes from the
-read. `--wait` settles on `idle`, `done`, or `blocked`. On `blocked` the target
-is waiting on an approval or a question of its own: inspect it with
-`herdr agent get <target>` and a read, then decide what to send.
+`agent prompt` returns pane metadata; the reply comes from the read. On
+`blocked`, inspect the target with `herdr agent get <target>` and another read
+before deciding what to send.
+
+### Opaque pane, including an agent behind SSH
+
+An agent inside SSH can appear in `herdr pane list` with `agent_status:
+unknown` and no recognized agent identity. Herdr can still operate its local
+terminal pane.
+
+Read the uniquely selected pane first and confirm that its visible foreground
+application is the intended coding-agent interface:
+
+```bash
+herdr pane read <pane-id> --source recent-unwrapped --lines 120
+```
+
+Then submit the message as terminal input and read the same pane:
+
+```bash
+herdr pane run <pane-id> "<message>"
+herdr pane read <pane-id> --source recent-unwrapped --lines 120
+```
+
+The existing SSH connection carries the input to the remote agent. If the pane
+is at a shell prompt instead of the intended agent, stop and report that the
+agent is not active. Starting a command on the remote host requires the user's
+explicit request.
+
+Allow the target time to respond. If its response is still in progress, repeat
+the read rather than resubmitting the prompt.
+
+## Write the message
+
+The text arrives exactly as if the user typed it, and the exchange remains in
+the target's history.
+
+- Open with your harness and `"$HERDR_PANE_ID"`.
+- State why you are contacting it.
+- Request a bounded answer.
+- Ask for information unless the user explicitly authorizes changes.
+
+## Read and report the reply
 
 When a larger `--lines` still does not reveal the whole response, the target is
 rendering on the terminal's alternate screen and those rows are gone. Ask it to
 write its full answer as Markdown to a temporary file and reply with only the
 path, then read that file.
 
-## Write the message
-
-The text arrives in the target's input exactly as if the user had typed it.
-It has no concept of another agent addressing it, and the exchange stays in its
-history permanently. So:
-
-- Open with who and where you are, e.g. `"$HERDR_PANE_ID"` and your harness.
-- State the shape of the answer you want, and bound it.
-- Ask for information. Leave changes to the target's files to the user's
-  explicit request.
-
-## Report back
-
-Quote the target's reply, attribute it to the agent kind, pane, and tab title,
-and keep it separate from your own reading of it. Report what you actually
-scraped; when a read comes back partial, say so rather than filling the gap.
+Quote or accurately summarize only the response visible in the target pane.
+Attribute it to the agent kind when known, pane ID, and tab label. State when
+the reply is partial or Herdr identifies the target only as an opaque pane.
+Keep unrelated terminal history, login details, addresses, tokens, and other
+sensitive output out of the report.
 
 ## Beyond talking
 
-`herdr --skill` prints the full CLI reference — starting agents, splitting
-panes, running commands, waiting on lifecycle state. Read it when the task goes
-past sending a message and reading the answer.
+`herdr --skill` prints the full CLI reference. Read it when the task goes past
+sending a message and reading the answer.
