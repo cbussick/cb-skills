@@ -1,6 +1,6 @@
 ---
 name: talk-to-agent
-description: Talk to a coding agent running in another Herdr pane, tab, or session, including an agent reached through an existing SSH terminal. Use when asked to message, question, or read a reply from "the other agent," "the other session," or an agent in another pane or tab. Requires HERDR_ENV=1.
+description: Contact an already-running coding agent in another Herdr pane, tab, or session, including through an existing SSH terminal. Use only when the target agent already exists and the user wants to send it a message or read its reply. Requires HERDR_ENV=1.
 ---
 
 # Talk to Another Agent
