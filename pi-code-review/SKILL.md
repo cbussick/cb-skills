@@ -1,9 +1,9 @@
 ---
-name: cb-code-review
+name: pi-code-review
 description: Run Matt Pocock's two-axis code review with isolated Pi child processes. Use when the user asks Pi to have independent agents review a branch, diff, pull request, or work-in-progress changes.
 ---
 
-# CB Code Review
+# Pi Code Review
 
 Adapt Matt Pocock's installed `code-review` skill to Pi. His skill defines the review; this skill only supplies Pi's missing subagent mechanism.
 
