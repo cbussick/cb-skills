@@ -1,5 +1,7 @@
 # Matt Pocock skills v1.3 audit
 
+This is the initial, pre-integration snapshot. See [main-branch integration status](LANDING.md) for merged changes, release effects and the remaining Vokhanhbel blocker.
+
 Audit date: 2026-10-04. Local baseline: `cb-skills` commit `a3da85f` plus the installed skill files captured before this audit.
 
 ## Summary
