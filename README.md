@@ -35,7 +35,7 @@ Run these commands from this repo so they update `skills-lock.json`:
 
 ```bash
 # Add one skill:
-npx --yes skills@latest add <owner>/<repository> --skill <skill-name> -y
+npx --yes skills@latest add <owner>/<repository> --skill <skill-name> --agent codex claude-code -y
 
 # Update the skills already listed in skills-lock.json:
 npx --yes skills@latest update -p
@@ -46,6 +46,10 @@ npx --yes skills@latest remove <skill-name> -y
 
 After adding or removing a skill, run `./scripts/install.sh` again. You do not
 need to run it after an update because the existing links still work.
+
+Include `--agent codex claude-code` when adding skills: Codex selects the shared
+`.agents/skills` destination, and Claude Code gets a link to it. Selecting only
+Claude Code can update `.claude/skills` while leaving the shared copy stale.
 
 Review downloaded skills before using them. Commit the changed
 `skills-lock.json`. Git ignores the downloaded files in `.agents/skills` and

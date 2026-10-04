@@ -1,0 +1,507 @@
+--- local-emil/prototype/LOGIC.md
++++ matt-v1.3.1/prototype/LOGIC.md
+@@ -0,0 +1,67 @@
++# Logic Prototype
++
++A single, self-contained HTML file (a **shareable demo**) that lets anyone drive a state model by clicking buttons. Use this when the question is about **business logic, state transitions, or data shape**: the kind of thing that looks reasonable on paper but only feels wrong once you push it through real cases.
++
++Because it's one file with nothing to install, you can hand it to a non-developer (a designer, a PM, a domain expert) and let them feel the model for themselves. So it speaks their language, not the code's.
++
++## When this is the right shape
++
++- "I'm not sure if this state machine handles the edge case where X then Y."
++- "Does this data model actually let me represent the case where..."
++- "I want to feel out what the API should look like before writing it."
++- Anything where someone wants to **press buttons and watch state change**.
++
++If the question is "what should this look like," this is the wrong branch. Use [UI.md](UI.md).
++
++## Process
++
++### 1. State the question
++
++Before writing code, write down what state model and what question you're prototyping. One paragraph, at the top of the demo (in a visible intro, not just a comment). A logic prototype that answers the wrong question is pure waste, so make the question explicit so it can be checked later, whether the user is watching now or returning to it AFK.
++
++### 2. Isolate the logic in a portable module
++
++Put the actual logic (the bit that's answering the question) in a single `<script>` block written as a small, pure module that could be lifted out and dropped into the real codebase later. The page around it is throwaway; this module isn't.
++
++The right shape depends on the question:
++
++- **A pure reducer**: `(state, action) => state`. Good when actions are discrete events and state is a single value.
++- **A state machine**: explicit states and transitions. Good when "which actions are even legal right now" is part of the question.
++- **A small set of pure functions** over a plain data type. Good when there's no implicit current state, just transformations.
++- **A class or module with a clear method surface** when the logic genuinely owns ongoing internal state.
++
++Pick whichever shape best fits the question being asked, *not* whichever is easiest to wire to a page. Keep it pure: no DOM, no `document`, no button handlers reaching inside it. The page calls into it; nothing flows the other direction. This is what makes the prototype useful past its own lifetime: once the question's answered, the validated reducer / machine / function set lifts into the real module on its own.
++
++### 3. Build the shareable HTML file
++
++One file, plain HTML/CSS/JS: no framework, no bundler, no server, everything inline so it opens by double-click and survives being emailed around. Anyone should be able to run it by opening it.
++
++Write it for a non-developer. Every label is in **domain language**, not code: buttons and state read like the business, not the reducer. Explain in plain words what's happening.
++
++Lay it out with a clean hierarchy, top to bottom:
++
++1. **Title and one-line explanation** of what this demo lets you explore (the question from step 1).
++2. **Current state**: the full relevant state, rendered as a readable panel (labelled fields, not a raw JSON dump), re-rendered after every click so the change is visible. Where it helps a non-developer follow, call out what just changed.
++3. **Free-play buttons**: one button per action, always available, so anyone can poke at the model in any order. Each click dispatches its action and re-renders the state.
++4. **Guided walkthroughs**: a set of **scenarios**, one per tab. Each tab holds a short plain-language description of the scenario (the situation it sets up and what to watch for) and underneath it, the ordered **buttons to press** for that scenario. Each step is a real button: clicking it performs that action and moves to the next step. Starting a walkthrough resets to a known initial state so the scenario runs the same way every time.
++
++Choose scenarios that demonstrate the awkward cases, the ones hard to reason about on paper: the happy path, a tricky edge case, an attempt at something that should be illegal.
++
++Keep it beautiful but restrained: clean typography, generous spacing, one accent colour. No animations, no gimmicks: nothing that competes with the state and the buttons.
++
++### 4. Hand it over
++
++Send them the file, or open it for them. They'll click through the walkthroughs and free-play whenever they get to it; the interesting moments are when they say "wait, that shouldn't be possible" or "huh, I assumed X would be different"; those are the bugs in the _idea_, which is the whole point. If they want new actions or a new scenario, add them. Prototypes evolve.
++
++### 5. Capture the answer and the prototype
++
++Once the prototype has answered its question, capture the answer, then capture the prototype the way the [SKILL](SKILL.md) describes. The logic-specific mapping: the validated reducer / machine / function set lifts into the real module (the decision, absorbed); the HTML shell rides along to the throwaway branch that keeps the prototype as a primary source, and being one self-contained file, it stays trivially re-runnable there.
++
++## Anti-patterns
++
++- **Don't add tests.** A prototype that needs tests is no longer a prototype.
++- **Don't wire it to the real database.** Use in-memory state unless the question is specifically about persistence.
++- **Don't generalise.** No "what if we wanted to support X later." The prototype answers one question.
++- **Don't blur the logic and the page together.** If the pure module references the DOM, `document`, or button handlers, it's no longer liftable. Keep the page as a thin shell over a pure module.
++- **Don't reach for a framework, bundler, or server.** One file the recipient double-clicks; a React app or a dev server defeats "shareable".
++- **Don't ship the HTML shell into production.** The page is optimised for being clicked through by hand. The logic module behind it is the bit worth keeping.
+--- local-emil/prototype/PICKER.md
++++ matt-v1.3.1/prototype/PICKER.md
+@@ -1,197 +0,0 @@
+-# The Picker
+-
+-The picker's appearance is **not a design decision** — it is this spec. Copy the markup, CSS, and wiring below verbatim; the only values that change per run are the variant names and count. It stays identical across every project so it always reads as harness chrome, never as part of the design being judged. Do not restyle it with the project's tokens, fonts, or colors.
+-
+-It is a floating dark pill, bottom-center. Dark glass works on top of any page — light or dark — which is why it is not theme-aware.
+-
+-## Markup
+-
+-The sliding highlight span first, one button per variant, a hairline divider, then the replay button (only when at least one variant has motion to re-trigger):
+-
+-```html
+-<nav class="proto-picker" aria-label="Prototype variants">
+-  <span class="proto-picker-highlight" aria-hidden="true"></span>
+-  <button class="proto-picker-item" data-active aria-current="true">Quiet</button>
+-  <button class="proto-picker-item">Editorial</button>
+-  <button class="proto-picker-item">Playful</button>
+-  <span class="proto-picker-divider" aria-hidden="true"></span>
+-  <button class="proto-picker-item proto-picker-replay" aria-label="Replay animation (R)">↻</button>
+-</nav>
+-```
+-
+-In a framework, keep the class names and structure; only the rendering syntax changes.
+-
+-## Styles
+-
+-```css
+-.proto-picker {
+-  position: fixed;
+-  bottom: 24px;
+-  left: 50%;
+-  transform: translateX(-50%);
+-  z-index: 2147483647;
+-  display: flex;
+-  align-items: center;
+-  gap: 2px;
+-  padding: 4px;
+-  border-radius: 999px;
+-  background: rgba(10, 10, 10, 0.82);
+-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+-  backdrop-filter: blur(12px) saturate(1.4);
+-  box-shadow:
+-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+-    0 8px 24px rgba(0, 0, 0, 0.24),
+-    0 2px 6px rgba(0, 0, 0, 0.12);
+-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+-  font-size: 13px;
+-  line-height: 1;
+-  -webkit-font-smoothing: antialiased;
+-  user-select: none;
+-  -webkit-user-select: none;
+-}
+-
+-.proto-picker-highlight {
+-  position: absolute;
+-  top: 4px;
+-  left: 0;
+-  height: 28px;
+-  border-radius: 999px;
+-  background: rgba(255, 255, 255, 0.12);
+-  will-change: transform;
+-}
+-
+-/* The slide is enabled only after first paint (data-ready), so load doesn't animate. */
+-.proto-picker[data-ready] .proto-picker-highlight {
+-  transition:
+-    transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+-    width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+-}
+-
+-@media (prefers-reduced-motion: reduce) {
+-  .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+-}
+-
+-.proto-picker-item {
+-  position: relative; /* sits above the highlight */
+-  display: flex;
+-  align-items: center;
+-  height: 28px;
+-  padding: 0 12px;
+-  border: 0;
+-  border-radius: 999px;
+-  background: transparent;
+-  color: rgba(255, 255, 255, 0.55);
+-  font: inherit;
+-  cursor: pointer;
+-  transition: color 150ms ease-out;
+-}
+-
+-.proto-picker-item:hover {
+-  color: rgba(255, 255, 255, 0.85);
+-}
+-
+-.proto-picker-item:active {
+-  transform: scale(0.97);
+-}
+-
+-.proto-picker-item:focus-visible {
+-  outline: 2px solid rgba(255, 255, 255, 0.4);
+-  outline-offset: 2px;
+-}
+-
+-.proto-picker-item[data-active] {
+-  color: #fff;
+-}
+-
+-.proto-picker-divider {
+-  width: 1px;
+-  height: 16px;
+-  margin: 0 4px;
+-  background: rgba(255, 255, 255, 0.12);
+-}
+-
+-.proto-picker-replay {
+-  padding: 0 10px;
+-  font-size: 14px;
+-}
+-
+-.proto-picker[data-position="top"] {
+-  bottom: auto;
+-  top: 24px;
+-}
+-```
+-
+-## Rules
+-
+-- **Verbatim.** These values are the spec. No project fonts, no brand colors, no theme switching, no extra shadows or borders.
+-- **The highlight slides; the variant swap stays instant.** The active pill animates between buttons (250ms, strong ease-out) as spatial feedback on the picker itself — but the variant being previewed still switches with no transition. The `width` transition is a deliberate exception to the transform/opacity rule: the element is 28px tall, absolutely positioned, and has no layout dependents, so the paint cost is negligible.
+-- **One allowed modification:** if a variant occupies the bottom-center of the screen (a toast stack, a bottom sheet, a dock), set `data-position="top"` so the picker never covers the work. Nothing else about it may move or change.
+-- **Replay is conditional.** Render the replay button and its divider only when at least one variant has an entrance or state animation worth re-triggering; a static comparison gets a shorter pill.
+-
+-## Behavior contract
+-
+-The contract is fixed regardless of how the harness renders:
+-
+-- Number keys `1–N` and `←`/`→` switch variants; `R` replays. Ignore key events when focus is in an input, textarea, select, or contenteditable, or when a modifier is held.
+-- Clicking an item switches to it; exactly one item carries `data-active` and `aria-current="true"` at all times, and the highlight slides to it.
+-- Selection persists across reload via a URL param (`?v=2`), falling back to variant 1. The highlight takes its initial position without animating (`data-ready` is added after first paint).
+-- Switching re-mounts the variant (so entrance animations re-run); the replay key re-mounts without switching.
+-
+-## Reference wiring
+-
+-Verbatim for the standalone-HTML branch; in a framework, keep the same behavior but express it idiomatically (state instead of `innerHTML`, a keyed re-mount instead of `requestAnimationFrame`, refs + a layout effect for the highlight measurement).
+-
+-```js
+-// `variants` is an array of render functions, one per variant, in picker order.
+-const stage = document.getElementById('stage');
+-const picker = document.querySelector('.proto-picker');
+-const highlight = picker.querySelector('.proto-picker-highlight');
+-const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+-const replay = picker.querySelector('.proto-picker-replay');
+-let current = 0;
+-
+-function moveHighlight() {
+-  const el = items[current];
+-  highlight.style.width = el.offsetWidth + 'px';
+-  highlight.style.transform = `translateX(${el.offsetLeft}px)`;
+-}
+-
+-function mount(i) {
+-  stage.innerHTML = '';
+-  // Clear first, render next frame, so entrance animations re-run.
+-  requestAnimationFrame(() => { stage.innerHTML = variants[i](); });
+-}
+-
+-function setActive(i) {
+-  if (i < 0 || i >= variants.length) return;
+-  current = i;
+-  items.forEach((el, j) => {
+-    el.toggleAttribute('data-active', j === i);
+-    if (j === i) el.setAttribute('aria-current', 'true');
+-    else el.removeAttribute('aria-current');
+-  });
+-  moveHighlight();
+-  const url = new URL(location);
+-  url.searchParams.set('v', i + 1);
+-  history.replaceState(null, '', url);
+-  mount(i);
+-}
+-
+-items.forEach((el, i) => el.addEventListener('click', () => setActive(i)));
+-replay?.addEventListener('click', () => mount(current));
+-window.addEventListener('resize', moveHighlight);
+-
+-document.addEventListener('keydown', (e) => {
+-  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+-  if (e.metaKey || e.ctrlKey || e.altKey) return;
+-  const num = parseInt(e.key, 10);
+-  if (num >= 1 && num <= variants.length) setActive(num - 1);
+-  else if (e.key === 'ArrowRight') setActive((current + 1) % variants.length);
+-  else if (e.key === 'ArrowLeft') setActive((current - 1 + variants.length) % variants.length);
+-  else if (e.key === 'r' || e.key === 'R') mount(current);
+-});
+-
+-setActive((parseInt(new URLSearchParams(location.search).get('v'), 10) || 1) - 1);
+-// Enable the slide only after first paint, so load doesn't animate.
+-requestAnimationFrame(() => requestAnimationFrame(() => picker.setAttribute('data-ready', '')));
+-```
+--- local-emil/prototype/SKILL.md
++++ matt-v1.3.1/prototype/SKILL.md
+@@ -1,98 +1,26 @@
+ ---
+ name: prototype
+-description: Build multiple genuinely different versions of a UI piece you describe, rendered behind a visual picker so you can flip through them live and promote the one that feels right. Only runs when explicitly invoked; it does not trigger on its own.
+-disable-model-invocation: true
++description: Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like.
+ ---
+ 
+-# Prototyping Variants
++# Prototype
+ 
+-## Initial Response
++A prototype is **throwaway code that answers a question**. The question decides the shape.
+ 
+-When this skill is first invoked without a specific question, respond only with:
++## Pick a branch
+ 
+-> I'm ready to build several genuinely different versions of a UI piece for you to flip through, my craft bar comes from Emil Kowalski's design engineering philosophy.
++Identify which question is being answered, using the user's prompt, the surrounding code, or by asking if the user is around:
+ 
+-Do not provide any other information until the user asks a question.
++- **"Does this logic / state model feel right?"** → [LOGIC.md](LOGIC.md). Build a single shareable HTML file (free-play buttons plus tabbed guided walkthroughs) that pushes the state machine through cases that are hard to reason about on paper, and that a non-developer can drive.
++- **"What should this look like?"** → [UI.md](UI.md). Generate several radically different UI variations on a single route, switchable via a URL search param and a floating bottom bar.
+ 
+-A divergence skill. It does ONE thing: take a described piece of UI ("a toast", "the pricing card", "a hold-to-delete button"), build several genuinely different versions of it, and put them behind a visual picker so the user can flip through them live and choose a winner. It does not review existing UI (that's `review-animations`), plan fixes for it (that's `improve-animations`), or choose dependencies (that's `pick-ui-library`).
++The two branches produce very different artifacts, so getting this wrong wastes the whole prototype. If the question is genuinely ambiguous and the user isn't reachable, default to whichever branch better matches the surrounding code (a backend module → logic; a page or component → UI) and state the assumption at the top of the prototype.
+ 
+-## Operating Posture
++## Rules that apply to both
+ 
+-You are a senior design engineer running a design exploration. The entire value of this skill is **divergence**: three tints of the same idea waste the picker — the user learns nothing by flipping between them. Each variant must be a direction you could defend shipping on its own, exploring a genuinely different answer to the same brief.
+-
+-Divergence is not an excuse to drop the craft bar. Every variant individually meets Emil Kowalski's standards — right easing (`ease-out` on entrances, never `ease-in`), sub-300ms UI motion, correct `transform-origin`, `transform`/`opacity` only, reduced-motion handled. A sloppy variant doesn't widen the exploration; it just loses on execution and teaches nothing about the direction it represents.
+-
+-## Hard Rules
+-
+-1. **Never touch production code during exploration.** Everything lives in an isolated prototype surface (see Phase 4). Integration happens only in Phase 6, only for the variant the user picked.
+-2. **Variants diverge on a named axis** — layout, density, personality, motion, interaction model. Before building, you must be able to state each variant's axis in a phrase. Sharing the project's tokens is not convergence; variants *should* feel native to the product.
+-3. **Every variant fully works.** Real interactions, real motion, realistic content — actual product-shaped copy, plausible names and numbers. No lorem ipsum, no dead buttons, no "imagine this part".
+-4. **The picker is chrome, not a contestant.** Its exact markup, styles, and behavior are specified in [PICKER.md](PICKER.md) — copy them verbatim. Its look is not a design decision and never adapts to the project.
+-5. **Clean up after the choice.** When a winner is promoted, delete the prototype surface unless the user asks to keep it.
+-
+-## Workflow
+-
+-### Phase 1 — Scope
+-
+-One thing per run. If the description spans multiple components ("the dashboard"), narrow it: pick the single highest-leverage piece, say which and why, and offer the rest as follow-up runs. Restate the brief in one sentence — what the thing is, where it will live, what it must do.
+-
+-### Phase 2 — Recon
+-
+-Before designing anything, map the ground the variants must stand on:
+-
+-- **Stack**: framework, styling system (Tailwind, CSS modules, vanilla), motion library if any.
+-- **Tokens**: colors, radii, spacing, fonts, easing/duration variables. Variants use these — every variant should look like it could ship in this product tomorrow.
+-- **Personality**: playful consumer app or crisp dashboard? This bounds how far the boldest variant may go.
+-- **Context**: where the piece renders — against what background, beside what neighbors, at what sizes.
+-
+-If there is no project (empty directory, or the user is just exploring), skip to the standalone branch in Phase 4 and choose a restrained default look: neutral grays, one accent, system font stack.
+-
+-### Phase 3 — Choose directions
+-
+-Default **3 variants**; up to 5 when the user asks or the design space is genuinely wide. More than 5 dilutes the comparison.
+-
+-Before writing any code, list the set: a name and an axis for each. Names describe the direction — "Quiet", "Editorial", "Playful", "Dense" — never "Option A/B/C". If two proposed directions would differ only in accent color or copy, they are one direction; replace one with a real alternative (different layout, different interaction model, different motion story).
+-
+-**Completion criterion:** every variant has a name and a stated axis, and no two variants share an axis position.
+-
+-### Phase 4 — Build the picker harness
+-
+-Two branches, by what exists:
+-
+-- **In a project with a dev server** — an isolated route or page (`/prototypes/<slug>`, or the framework's equivalent), one file per variant plus a small harness file. Nothing imports from the prototype surface into production code.
+-- **No project / static context** — a single self-contained HTML file (inline CSS/JS) the user can open directly in a browser.
+-
+-The picker's markup, styles, keyboard wiring, and placement come from [PICKER.md](PICKER.md), verbatim — load it now and build exactly that. Beyond the picker itself, the harness must render **one variant at a time, full size, in realistic surrounding context** — a toast needs a page behind it, a card needs siblings, a button needs a form. Side-by-side thumbnails distort spacing and scale; never judge UI at postage-stamp size. Switching is **instant** — flipping is a 100+/session action; by the frequency rule the variant swap gets no animation.
+-
+-### Phase 5 — Verify and hand off
+-
+-Run the harness. Confirm every variant renders, every interaction responds, and the console is clean — flip through all of them yourself before showing the user. If browser tooling is available, screenshot each variant.
+-
+-Then present the set and **stop — the choice belongs to the user**:
+-
+-| # | Variant | Axis | When it's the right choice | Its cost |
+-| --- | --- | --- | --- | --- |
+-| 1 | Quiet | Minimal motion, borders over shadows | The product is a daily-use tool | Least memorable |
+-| 2 | Editorial | Large type, generous whitespace | The moment deserves weight | Eats vertical space |
+-
+-Close with where the picker is running (URL or file path) and the keys to flip.
+-
+-**Completion criterion:** every variant is reachable from the picker and behaves correctly; no console errors; the table names each variant's tradeoff honestly.
+-
+-### Phase 6 — Promote on selection
+-
+-When the user picks: integrate that variant where it belongs, following the project's existing conventions (file layout, naming, token usage), then delete the prototype surface per Hard Rule 5. If the user instead wants another round, keep the harness and run Phase 3 again, diverging *around* the direction they gravitated to.
+-
+-## Invocation Variants
+-
+-| Invocation | Behavior |
+-| --- | --- |
+-| `<description>` | Full workflow: scope → recon → 3 variants → picker → wait for choice |
+-| `<description> x5` | Same, with that many variants (capped at 5) |
+-| `riff <variant>` | New round: keep the harness, generate a fresh set diverging around the named variant's direction |
+-| `keep <variant>` | Promote that variant into the codebase and delete the prototype surface |
+-| `keep <variant>, leave the picker` | Promote, but keep the prototype surface around |
+-
+-## Tone
+-
+-Sell each variant honestly — one line on when it wins, one on what it costs. Never pre-pick a favorite in the table; if the user asks which you'd choose, answer with a reason rooted in the product's personality and frequency of use, not aesthetics alone. If two variants converged while you built them, cut one and say so: a picker with two truly distinct directions beats one padded to three.
++1. **Throwaway from day one, and clearly marked as such.** Locate the prototype code close to where it will actually be used (next to the module or page it's prototyping for) so context is obvious, but name it so a casual reader can see it's a prototype, not production. For throwaway UI routes, obey whatever routing convention the project already uses; don't invent a new top-level structure.
++2. **Trivial to run.** A UI prototype starts from one command in the project's task runner: `pnpm <name>`, `python <path>`, `bun <path>`, etc. A logic demo is a single HTML file the user double-clicks. Either way, no thinking required to start it.
++3. **No persistence by default.** State lives in memory. Persistence is the thing the prototype is _checking_, not something it should depend on. If the question explicitly involves a database, hit a scratch DB or a local file with a clear "PROTOTYPE, wipe me" name.
++4. **Skip the polish.** No tests, no error handling beyond what makes the prototype _runnable_, no abstractions. The point is to learn something fast.
++5. **Surface the state.** After every action (logic) or on every variant switch (UI), print or render the full relevant state so the user can see what changed.
++6. **Capture it when done.** Fold any validated decision into the real code, then capture the prototype itself as a **primary source**: commit it to a throwaway branch, out of main, and leave a context pointer to that branch on the implementation issue. Capture the answer too (the verdict and the question it settled) in the issue or a commit. The main branch keeps only the validated decision.
+--- local-emil/prototype/UI.md
++++ matt-v1.3.1/prototype/UI.md
+@@ -0,0 +1,112 @@
++# UI Prototype
++
++Generate **several radically different UI variations** on a single route, switchable from a floating bottom bar. The user flips between variants in the browser, picks one (or steals bits from each), then throws the rest away.
++
++If the question is about logic/state rather than what something looks like, this is the wrong branch. Use [LOGIC.md](LOGIC.md).
++
++## When this is the right shape
++
++- "What should this page look like?"
++- "I want to see a few options for this dashboard before committing."
++- "Try a different layout for the settings screen."
++- Any time the user would otherwise spend a day picking between three vague mockups in their head.
++
++## Two sub-shapes: strongly prefer sub-shape A
++
++A UI prototype is much easier to judge when it's **butting up against the rest of the app**: real header, real sidebar, real data, real density. A throwaway route on its own is a vacuum: every variant looks fine in isolation. Default to sub-shape A whenever there's a plausible existing page to host the variants. Only reach for sub-shape B if the prototype genuinely has no nearby home.
++
++### Sub-shape A: adjustment to an existing page (preferred)
++
++The route already exists. Variants are rendered **on the same route**, gated by a `?variant=` URL search param. The existing data fetching, params, and auth all stay. Only the rendering swaps. This is the default; pick it unless there's a specific reason not to.
++
++If the prototype is for something that doesn't yet have a page but *would naturally live inside one* (a new section of the dashboard, a new card on the settings screen, a new step in an existing flow), it's still sub-shape A. Mount the variants inside the host page.
++
++### Sub-shape B: a new page (last resort)
++
++Only use this when the thing being prototyped genuinely has no existing page to live inside (e.g. an entirely new top-level surface, or a flow that can't be embedded anywhere sensible).
++
++Create a **throwaway route** following whatever routing convention the project already uses. Don't invent a new top-level structure. Name it so it's obviously a prototype (e.g. include the word `prototype` in the path or filename). Same `?variant=` pattern.
++
++Before committing to sub-shape B, sanity-check: is there really no existing page this could be embedded in? An empty route hides design problems that a populated one would expose.
++
++In both sub-shapes the floating bottom bar is identical.
++
++## Process
++
++### 1. State the question and pick N
++
++Default to **3 variants**. More than 5 stops being radically different and starts being noise, so cap there.
++
++Write down the plan in one line, in the prototype's location or a top-of-file comment:
++
++> "Three variants of the settings page, switchable via `?variant=`, on the existing `/settings` route."
++
++This works whether the user is here to push back or not.
++
++### 2. Generate radically different variants
++
++Draft each variant. Hold each one to:
++
++- The page's purpose and the data it has access to.
++- The project's component library / styling system (TailwindCSS, shadcn, MUI, plain CSS, whatever).
++- A clear exported component name, e.g. `VariantA`, `VariantB`, `VariantC`.
++
++Variants must be **structurally different**: different layout, different information hierarchy, different primary affordance, not just different colours. Three slightly-tweaked card grids isn't a UI prototype, it's wallpaper. If two drafts come out too similar, redo one with explicit "do not use a card grid" guidance.
++
++### 3. Wire them together
++
++Create a single switcher component on the route:
++
++```tsx
++// pseudo-code, adapt to the project's framework
++const variant = searchParams.get('variant') ?? 'A';
++return (
++  <>
++    {variant === 'A' && <VariantA {...data} />}
++    {variant === 'B' && <VariantB {...data} />}
++    {variant === 'C' && <VariantC {...data} />}
++    <PrototypeSwitcher variants={['A','B','C']} current={variant} />
++  </>
++);
++```
++
++For sub-shape A (existing page): keep all the existing data fetching above the switcher; only the rendered subtree changes per variant.
++
++For sub-shape B (new page): the throwaway route under `/prototype/<name>` mounts the same switcher.
++
++### 4. Build the floating switcher
++
++A small fixed-position bar at the bottom-centre of the screen with three pieces:
++
++- **Left arrow**: cycles to the previous variant (wraps around).
++- **Variant label**: shows the current variant key and, if the variant exports a name, that name too. e.g. `B (Sidebar layout)`.
++- **Right arrow**: cycles forward (wraps around).
++
++Behaviour:
++
++- Clicking an arrow updates the URL search param (use the framework's router, e.g. `router.replace` on Next, `navigate` on React Router, etc) so the variant is shareable and reload-stable.
++- Keyboard: `←` and `→` arrow keys also cycle. Don't intercept arrow keys when an `<input>`, `<textarea>`, or `[contenteditable]` is focused.
++- Visually distinct from the page (e.g. high-contrast pill, subtle shadow) so it's obviously not part of the design being evaluated.
++- Hidden in production builds: gate on `process.env.NODE_ENV !== 'production'` or an equivalent check, so a stray prototype merge can't ship the bar to users.
++
++Put the switcher in a single shared component so both sub-shapes can reuse it. Locate it wherever shared UI lives in the project.
++
++### 5. Hand it over
++
++Surface the URL (and the `?variant=` keys). The user will flip through whenever they get to it. The interesting feedback is usually **"I want the header from B with the sidebar from C"**, which is the actual design they want.
++
++### 6. Capture the answer and clean up
++
++Once a variant has won, capture the answer (which variant and why), then capture the prototype the way the [SKILL](SKILL.md) describes. Fold the winner into the real code and move the rest onto the throwaway branch, not into main:
++
++- **Sub-shape A**: fold the winner into the existing page; drop the losing variants and the switcher from main.
++- **Sub-shape B**: promote the winning variant to a real route; drop the throwaway route and the switcher from main.
++
++The full set of variants is the primary source, so it lands on the throwaway branch, not the bin, since variant components and the switcher left in the main branch rot fast and confuse the next reader.
++
++## Anti-patterns
++
++- **Variants that differ only in colour or copy.** That's a tweak, not a prototype. Real variants disagree about structure.
++- **Sharing too much code between variants.** A shared `<Header>` is fine; a shared `<Layout>` defeats the point. Each variant should be free to throw out the layout.
++- **Wiring variants to real mutations.** Read-only prototypes are fine. If a variant needs to mutate, point it at a stub: the question is "what should this look like", not "does the backend work".
++- **Promoting the prototype directly to production.** The variant code was written under prototype constraints (no tests, minimal error handling). Rewrite it properly when you fold it in.
+--- local-emil/prototype/agents/openai.yaml
++++ matt-v1.3.1/prototype/agents/openai.yaml
+@@ -0,0 +1,3 @@
++interface:
++  display_name: "Prototype"
++  short_description: "Prototype to answer a design question"

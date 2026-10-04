@@ -1,0 +1,428 @@
+--- local/ask-matt/SKILL.md
++++ v1.3.1/ask-matt/SKILL.md
+@@ -14,20 +14,26 @@
+ 
+ The route most work travels. You have an idea and want it built.
+ 
+-1. **`/grill-with-docs`** sharpens the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. (No working directory? Use `/grill-me` instead, covered under Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail, which makes it the better of the two whenever a repo is there to leave it in.)
++1. **`/grill-with-docs`** sharpens the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `GLOSSARY.md` and ADRs. (No working directory? Use `/grill-me` instead, covered under Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail, which makes it the better of the two whenever a repo is there to leave it in.)
+ 2. **Branch: can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (a prototype lives in its own directory, which is exactly what `/handoff` is for; see Phase boundaries):
+    - **`/handoff`** out, then open a fresh session against that file,
+    - **`/prototype`** to answer the question with throwaway code,
+    - **`/handoff`** back what you learned, and reference it from the original idea thread.
+ 3. **Branch: is this a multi-session build?**
+-   - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed: kick off **`/implement`** per ticket, **`/clear`ing context between each one**. Each ticket is self-contained, so the last one's context is disposable.
++   - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. Then work the tickets one of two ways:
++     - **`/implement`** per ticket, **`/clear`ing context between each one**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed. Each ticket is self-contained, so the last one's context is disposable.
++     - **`/implement-spec`** for the whole spec in one run. It reads the tickets as a **task graph**, runs implementer subagents across the ready **frontier** in parallel, and lands everything on one **integration branch**. Reach for it when you'd rather orchestrate the build than drive each ticket yourself.
+    - **No** → **`/implement`** right here, in the same context window.
+ 
+-   Either way, **`/implement`** builds each issue by driving **`/tdd`** internally (one red-green slice at a time), then closes out by running **`/code-review`**, a two-axis review (Standards + Spec) of the diff, before committing. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
++   Either way, the code gets built by driving **`/tdd`** (one red-green slice at a time) and closes out with **`/code-review`**, a two-axis review (Standards + Spec) of the diff. `/implement` runs both per ticket; `/implement-spec`'s implementers each drive `/tdd`, and it runs one `/code-review` over the integration branch. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
++
++   When the work goes up as a pull request, **`/pr`** shapes the body: the smallest visual that shows the change, before/after evidence that it works, and a one-way or two-way door call. It's model-invoked, so the agent reaches for it whenever it writes a PR.
++
++4. **`/retro`** closes the loop. After a build, and especially one that went sideways, it looks back over the session and suggests changes to the agent's **environment**, not the code: navigation pointers, automated checks, the coding standards `/code-review` enforces, steering files, tooling. Mechanical mistakes become deterministic checks; judgement calls become coding standards. The next build then starts from a better environment.
+ 
+ ### Context hygiene
+ 
+-Keep steps 1–3 in **one unbroken context window** (don't compact or clear until after `/to-tickets`) so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket.
++Keep steps 1–3 in **one unbroken context window** (don't compact or clear until after `/to-tickets`) so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket. Run `/retro` in the session it's looking back on, before you clear; after clearing, point it at that session's log instead.
+ 
+ The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~150k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded; `/compact` at the nearest phase boundary and carry on (see Phase boundaries).
+ 
+@@ -39,7 +45,7 @@
+ 
+   Triage is only for issues **you didn't create**: bug reports, incoming feature requests, anything that arrives raw. Tickets that `/to-tickets` produced are already agent-ready, so **don't triage them**.
+ 
+-- **Something's broken** → **`/diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression that crept in between two known-good states. It refuses to theorise until it has a **tight feedback loop** (one command that already goes red on *this* bug), then fixes with a regression test. Its post-mortem hands off to **`/improve-codebase-architecture`** when the real finding is that there's no good seam to lock the bug down.
++- **Something's broken** → **`/diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression that crept in between two known-good states. It refuses to theorise until it has a **tight feedback loop** (one command that already goes red on *this* bug), then fixes with a regression test. Once the fix is in, run **`/retro`** in the same session to ask what would have prevented the bug; where the real finding is that there's no good seam to lock it down, that's a job for **`/improve-codebase-architecture`**.
+ 
+ - **A huge, foggy effort: a greenfield project or a huge feature build, too big for one session** → **`/wayfinder`**, the most cognitively demanding flow here. When the way from here to the destination isn't visible yet, it charts a **shared map** of **decision tickets** on the issue tracker and resolves them one at a time, producing **decisions, not deliverables**, until the fog is pushed back and the way is clear. Where **`/grill-with-docs`** sharpens an idea you can hold in one session, wayfinder is for the idea you can't, and it's slower and denser, so save it for exactly that, never a well-scoped feature.
+ 
+@@ -55,7 +61,7 @@
+ 
+ Two model-invoked references that run *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them directly when the **words**, not the process, are the problem; or let the skills above pull them in.
+ 
+-- **`/domain-modeling`**: sharpen the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. It's the active discipline `/grill-with-docs` drives to keep `CONTEXT.md` a clean glossary.
++- **`/domain-modeling`**: sharpen the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. It's the active discipline `/grill-with-docs` drives to keep `GLOSSARY.md` a clean glossary.
+ - **`/codebase-design`** is the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*: a lot of behaviour behind a small interface at a clean seam. `/tdd` and `/improve-codebase-architecture` both speak it.
+ 
+ ## Phase boundaries
+@@ -74,14 +80,13 @@
+ 
+ Off the main flow entirely.
+ 
+-- **`/grill-me`**: the same relentless interview as `/grill-with-docs`, but **stateless**: it saves nothing locally and builds no `CONTEXT.md`. Reach for it when you are **not working in a working directory** (sharpening a plan, a design, a piece of writing, anything with no repo under it). If you are in a working directory, use `/grill-with-docs` instead: it runs the same interview and leaves a paper trail, so it is strictly the better one.
++- **`/grill-me`**: the same relentless interview as `/grill-with-docs`, but **stateless**: it saves nothing locally and builds no `GLOSSARY.md`. Reach for it when you are **not working in a working directory** (sharpening a plan, a design, a piece of writing, anything with no repo under it). If you are in a working directory, use `/grill-with-docs` instead: it runs the same interview and leaves a paper trail, so it is strictly the better one.
+ - **`/grilling`** is the interview primitive itself: rounds, the frontier, facts are the agent's job and decisions are yours. `/grill-me` and `/grill-with-docs` are the two named ways in, and `/triage`, `/wayfinder` and `/improve-codebase-architecture` all run it internally. Reach for it directly only when you want the interview with no wrapper around it.
+-- **`/resolving-merge-conflicts`** works an in-progress merge or rebase conflict hunk by hunk, resolving by **intent** traced to each side's primary source rather than by picking lines, then finishes the operation. It never runs `--abort`. Standalone and off every flow: reach for it when you are already mid-conflict.
+ - **`/prototype`** is a small, throwaway program that answers one design question: does this state model feel right, or what should this UI look like. Throwaway is a constraint on how the code is written, not a promise to destroy it: the answer folds into the real code, and the prototype itself is kept as a **primary source** on a `prototype/<name>` branch out of main, pointed at from the implementation issue. It's the detour in step 2 of the main flow, but reach for it any time a design question is hard to settle on paper.
+ - **`/research`**: delegate reading legwork to a **background agent**: it investigates a question against **primary sources**, then leaves a cited Markdown file in the repo. Keep working while it reads. The file it produces is something to take *into* the main flow at `/grill-with-docs`, since research feeds the thinking rather than replacing it.
+ - **`/to-questionnaire`** comes in when the thing blocking you isn't in your head or the codebase but in **someone else's**, and it writes them a questionnaire to fill in. It's the inverse of `/grill-me`: instead of interviewing you about the subject, it interviews you about the **send** (who it's going to, what you need back) and aims the questions at the gap. What comes back is material for `/grill-with-docs` or `/to-spec`.
+ - **`/wizard`** is for the steps only a **human** can take: provisioning infrastructure, setting up credentials or CI secrets, clicking through an unfamiliar third-party dashboard, running a one-off migration or cutover. It generates an interactive bash script that opens each URL, captures each value, and writes it into `.env` and GitHub secrets, so the procedure stops being something you re-explain to an agent every time. Model-invoked, so the agent reaches for it the moment it hits a wall only you can pass. If the agent could just do it itself, it should; this is for where a human is genuinely in the loop.
+-- **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `CONTEXT.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
++- **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `GLOSSARY.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
+ - **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
+ - **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
+ 
+--- local/codebase-design/DESIGN-IT-TWICE.md
++++ v1.3.1/codebase-design/DESIGN-IT-TWICE.md
+@@ -27,7 +27,7 @@
+ - Agent 3: "Optimise for the most common caller: make the default case trivial."
+ - Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
+ 
+-Include both [SKILL.md](SKILL.md) vocabulary and CONTEXT.md vocabulary in the brief so each sub-agent names things consistently with the architecture language and the project's domain language.
++Include both [SKILL.md](SKILL.md) vocabulary and GLOSSARY.md vocabulary in the brief so each sub-agent names things consistently with the architecture language and the project's domain language.
+ 
+ Each sub-agent outputs:
+ 
+--- local/diagnosing-bugs/SKILL.md
++++ v1.3.1/diagnosing-bugs/SKILL.md
+@@ -7,7 +7,7 @@
+ 
+ A discipline for hard bugs. Skip phases only when explicitly justified.
+ 
+-When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
++When exploring the codebase, read `GLOSSARY.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
+ 
+ ## Redact
+ 
+--- local/domain-modeling/CONTEXT-FORMAT.md
++++ v1.3.1/domain-modeling/CONTEXT-FORMAT.md
+@@ -1,60 +0,0 @@
+-# CONTEXT.md Format
+-
+-## Structure
+-
+-```md
+-# {Context Name}
+-
+-{One or two sentence description of what this context is and why it exists.}
+-
+-## Language
+-
+-**Order**:
+-{A one or two sentence description of the term}
+-_Avoid_: Purchase, transaction
+-
+-**Invoice**:
+-A request for payment sent to a customer after delivery.
+-_Avoid_: Bill, payment request
+-
+-**Customer**:
+-A person or organization that places orders.
+-_Avoid_: Client, buyer, account
+-```
+-
+-## Rules
+-
+-- **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
+-- **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
+-- **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
+-- **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.
+-
+-## Single vs multi-context repos
+-
+-**Single context (most repos):** One `CONTEXT.md` at the repo root.
+-
+-**Multiple contexts:** A `CONTEXT-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
+-
+-```md
+-# Context Map
+-
+-## Contexts
+-
+-- [Ordering](./src/ordering/CONTEXT.md): receives and tracks customer orders
+-- [Billing](./src/billing/CONTEXT.md): generates invoices and processes payments
+-- [Fulfillment](./src/fulfillment/CONTEXT.md): manages warehouse picking and shipping
+-
+-## Relationships
+-
+-- **Ordering → Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
+-- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
+-- **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
+-```
+-
+-The skill infers which structure applies:
+-
+-- If `CONTEXT-MAP.md` exists, read it to find contexts
+-- If only a root `CONTEXT.md` exists, single context
+-- If neither exists, create a root `CONTEXT.md` lazily when the first term is resolved
+-
+-When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
+--- local/domain-modeling/GLOSSARY-FORMAT.md
++++ v1.3.1/domain-modeling/GLOSSARY-FORMAT.md
+@@ -0,0 +1,60 @@
++# GLOSSARY.md Format
++
++## Structure
++
++```md
++# {Context Name}
++
++{One or two sentence description of what this context is and why it exists.}
++
++## Language
++
++**Order**:
++{A one or two sentence description of the term}
++_Avoid_: Purchase, transaction
++
++**Invoice**:
++A request for payment sent to a customer after delivery.
++_Avoid_: Bill, payment request
++
++**Customer**:
++A person or organization that places orders.
++_Avoid_: Client, buyer, account
++```
++
++## Rules
++
++- **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
++- **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
++- **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
++- **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.
++
++## Single vs multi-context repos
++
++**Single context (most repos):** One `GLOSSARY.md` at the repo root.
++
++**Multiple contexts:** A `GLOSSARY-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
++
++```md
++# Glossary Map
++
++## Contexts
++
++- [Ordering](./src/ordering/GLOSSARY.md): receives and tracks customer orders
++- [Billing](./src/billing/GLOSSARY.md): generates invoices and processes payments
++- [Fulfillment](./src/fulfillment/GLOSSARY.md): manages warehouse picking and shipping
++
++## Relationships
++
++- **Ordering → Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
++- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
++- **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
++```
++
++The skill infers which structure applies:
++
++- If `GLOSSARY-MAP.md` exists, read it to find contexts
++- If only a root `GLOSSARY.md` exists, single context
++- If neither exists, create a root `GLOSSARY.md` lazily when the first term is resolved
++
++When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
+--- local/domain-modeling/SKILL.md
++++ v1.3.1/domain-modeling/SKILL.md
+@@ -1,11 +1,11 @@
+ ---
+ name: domain-modeling
+-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
++description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a GLOSSARY.md, or recording or editing an ADR.
+ ---
+ 
+ # Domain Modeling
+ 
+-Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `CONTEXT.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
++Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `GLOSSARY.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
+ 
+ ## File structure
+ 
+@@ -13,7 +13,7 @@
+ 
+ ```
+ /
+-├── CONTEXT.md
++├── GLOSSARY.md
+ ├── docs/
+ │   └── adr/
+ │       ├── 0001-event-sourced-orders.md
+@@ -21,29 +21,29 @@
+ └── src/
+ ```
+ 
+-If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
++If a `GLOSSARY-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
+ 
+ ```
+ /
+-├── CONTEXT-MAP.md
++├── GLOSSARY-MAP.md
+ ├── docs/
+ │   └── adr/                          ← system-wide decisions
+ ├── src/
+ │   ├── ordering/
+-│   │   ├── CONTEXT.md
++│   │   ├── GLOSSARY.md
+ │   │   └── docs/adr/                 ← context-specific decisions
+ │   └── billing/
+-│       ├── CONTEXT.md
++│       ├── GLOSSARY.md
+ │       └── docs/adr/
+ ```
+ 
+-Create files lazily: only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
++Create files lazily: only when you have something to write. If no `GLOSSARY.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
+ 
+ ## During the session
+ 
+ ### Challenge against the glossary
+ 
+-When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
++When the user uses a term that conflicts with the existing language in `GLOSSARY.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
+ 
+ ### Sharpen fuzzy language
+ 
+@@ -57,11 +57,11 @@
+ 
+ When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible. Which is right?"
+ 
+-### Update CONTEXT.md inline
++### Update GLOSSARY.md inline
+ 
+-When a term is resolved, update `CONTEXT.md` right there. Don't batch these up: capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
++When a term is resolved, update `GLOSSARY.md` right there. Don't batch these up: capture them as they happen. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md).
+ 
+-`CONTEXT.md` should be totally devoid of implementation details. Do not treat `CONTEXT.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
++`GLOSSARY.md` should be totally devoid of implementation details. Do not treat `GLOSSARY.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
+ 
+ ### Offer ADRs sparingly
+ 
+--- local/setup-matt-pocock-skills/SKILL.md
++++ v1.3.1/setup-matt-pocock-skills/SKILL.md
+@@ -10,7 +10,7 @@
+ 
+ - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
+ - **Triage labels**: the strings used for the five canonical triage roles
+-- **Domain docs**: where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
++- **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
+ 
+ This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
+ 
+@@ -22,7 +22,7 @@
+ 
+ - `git remote -v` and `.git/config`: is this a GitHub repo? Which one?
+ - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
+-- `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
++- `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root
+ - `docs/adr/` and any `src/*/docs/adr/` directories
+ - `docs/agents/`: does this skill's prior output already exist?
+ - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
+@@ -56,9 +56,9 @@
+ 
+ The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `triage` applies existing labels instead of creating duplicates.
+ 
+-**Section C: Domain docs.** Default to **single-context** (one `CONTEXT.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
++**Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
+ 
+-Offer **multi-context** (a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
++Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
+ 
+ ### 3. Confirm and edit
+ 
+--- local/setup-matt-pocock-skills/domain.md
++++ v1.3.1/setup-matt-pocock-skills/domain.md
+@@ -4,8 +4,8 @@
+ 
+ ## Before exploring, read these
+ 
+-- **`CONTEXT.md`** at the repo root, or
+-- **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
++- **`GLOSSARY.md`** at the repo root, or
++- **`GLOSSARY-MAP.md`** at the repo root if it exists: it points at one `GLOSSARY.md` per context. Read each one relevant to the topic.
+ - **`docs/adr/`**: read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
+ 
+ If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
+@@ -16,31 +16,31 @@
+ 
+ ```
+ /
+-├── CONTEXT.md
++├── GLOSSARY.md
+ ├── docs/adr/
+ │   ├── 0001-event-sourced-orders.md
+ │   └── 0002-postgres-for-write-model.md
+ └── src/
+ ```
+ 
+-Multi-context repo (presence of `CONTEXT-MAP.md` at the root):
++Multi-context repo (presence of `GLOSSARY-MAP.md` at the root):
+ 
+ ```
+ /
+-├── CONTEXT-MAP.md
++├── GLOSSARY-MAP.md
+ ├── docs/adr/                          ← system-wide decisions
+ └── src/
+     ├── ordering/
+-    │   ├── CONTEXT.md
++    │   ├── GLOSSARY.md
+     │   └── docs/adr/                  ← context-specific decisions
+     └── billing/
+-        ├── CONTEXT.md
++        ├── GLOSSARY.md
+         └── docs/adr/
+ ```
+ 
+ ## Use the glossary's vocabulary
+ 
+-When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
++When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `GLOSSARY.md`. Don't drift to synonyms the glossary explicitly avoids.
+ 
+ If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
+ 
+--- local/tdd/SKILL.md
++++ v1.3.1/tdd/SKILL.md
+@@ -7,7 +7,7 @@
+ 
+ TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
+ 
+-When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
++When exploring the codebase, read `GLOSSARY.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+ 
+ ## What a good test is
+ 
+--- local/triage/SKILL.md
++++ v1.3.1/triage/SKILL.md
+@@ -73,7 +73,7 @@
+ 
+ 3. **Verify the claim.** Before any grilling, check that the claim holds up. For a bug, reproduce it from the reporter's steps. For a PR, confirm the diff does what it claims: check it out, run the relevant tests or commands. Report what happened: confirmed (with code path), failed, or insufficient detail (a strong `needs-info` signal). A confirmed verification makes a much stronger agent brief.
+ 
+-4. **Grill (if needed).** If the request needs fleshing out, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `CONTEXT.md`/ADRs inline as decisions land.
++4. **Grill (if needed).** If the request needs fleshing out, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `GLOSSARY.md`/ADRs inline as decisions land.
+ 
+ 5. **Apply the outcome:**
+    - `ready-for-agent`: post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)).
+--- local/wait-what/SKILL.md
++++ v1.3.1/wait-what/SKILL.md
+@@ -4,4 +4,4 @@
+ disable-model-invocation: true
+ ---
+ 
+-Wait, I don't understand where you've got to here. Re-pitch that: give me a little bit of context, talk in ASD-STE100 Simplified Technical English, and use the ubiquitous language from `CONTEXT.md` (follow `CONTEXT-MAP.md` to the right one if the repo has more than one).
++Wait, I don't understand where you've got to here. Re-pitch that: give me a little bit of context, talk in ASD-STE100 Simplified Technical English, and use the ubiquitous language from `GLOSSARY.md` (follow `GLOSSARY-MAP.md` to the right one if the repo has more than one).
+--- local/resolving-merge-conflicts/SKILL.md
++++ /dev/null
+@@ -1,14 +0,0 @@
+----
+-name: resolving-merge-conflicts
+-description: "Use when you need to resolve an in-progress git merge/rebase conflict."
+----
+-
+-1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
+-
+-2. **Find the primary sources** for each conflict. Understand deeply why each change was made, and what the original intent was. Read the commit messages, check the PRs, check original issues/tickets.
+-
+-3. **Resolve each hunk.** Preserve both intents where possible. Where incompatible, pick the one matching the merge's stated goal and note the trade-off. Do **not** invent new behaviour. Always resolve; never `--abort`.
+-
+-4. Discover the project's **automated checks** and run them, typically typecheck, then tests, then format. Fix anything the merge broke.
+-
+-5. **Finish the merge/rebase.** Stage everything and commit. If rebasing, continue the rebase process until all commits are rebased.
+--- local/resolving-merge-conflicts/agents/openai.yaml
++++ /dev/null
+@@ -1,3 +0,0 @@
+-interface:
+-  display_name: "Resolving Merge Conflicts"
+-  short_description: "Resolve merge and rebase conflicts"

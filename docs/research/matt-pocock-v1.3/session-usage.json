@@ -1,0 +1,526 @@
+[
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T20-25-41-266Z_01a10897-fe91-7183-944b-36eabfece90c.jsonl",
+    "harness": "pi",
+    "id": "01a10897-fe91-7183-944b-36eabfece90c",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:50:40.214992+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 7,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T20-39-41-790Z_01a108a4-d1de-7501-8ef1-7ed435970113.jsonl",
+    "harness": "pi",
+    "id": "01a108a4-d1de-7501-8ef1-7ed435970113",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:49:25.335622+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T20-01-47-427Z_01a10882-1da2-750b-a404-cc57340f4c5b.jsonl",
+    "harness": "pi",
+    "id": "01a10882-1da2-750b-a404-cc57340f4c5b",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:40:46.972058+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 12,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T20-33-53-718Z_01a1089f-8235-76be-be08-44bc6157df8f.jsonl",
+    "harness": "pi",
+    "id": "01a1089f-8235-76be-be08-44bc6157df8f",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:34:11.420091+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T20-09-55-336Z_01a10889-8f87-71a4-8d81-dda367c65238.jsonl",
+    "harness": "pi",
+    "id": "01a10889-8f87-71a4-8d81-dda367c65238",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:31:13.348205+00:00",
+    "loads": [
+      {
+        "skill": "frontend-design",
+        "line": 9,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T19-48-29-353Z_01a10875-f028-727e-82bf-ebf69e92d44f.jsonl",
+    "harness": "pi",
+    "id": "01a10875-f028-727e-82bf-ebf69e92d44f",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T20:01:57.078479+00:00",
+    "loads": [
+      {
+        "skill": "writing-for-agents",
+        "line": 36,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-04T19-53-58-847Z_01a1087a-f73e-7077-bb5a-958229b8445e.jsonl",
+    "harness": "pi",
+    "id": "01a1087a-f73e-7077-bb5a-958229b8445e",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-04T19:55:13.370479+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-04T19-22-01-094Z_01a1085d-b404-764f-8c98-9afa48ea7cae.jsonl",
+    "harness": "pi",
+    "id": "01a1085d-b404-764f-8c98-9afa48ea7cae",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-04T19:53:54.609088+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.codex/sessions/2026/10/04/rollout-2026-10-04T19-49-46-01a10877-1ef3-7372-9b09-dfa54a4d01c0.jsonl",
+    "harness": "codex",
+    "id": "01a10877-1ef3-7372-9b09-dfa54a4d01c0",
+    "cwd": "/tmp/codex-elephant-Ziscvw",
+    "last_modified": "2026-10-04T19:50:47.253160+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T19-20-27-744Z_01a1085c-475f-75c2-b409-27c7c99ea7f7.jsonl",
+    "harness": "pi",
+    "id": "01a1085c-475f-75c2-b409-27c7c99ea7f7",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T19:21:43.915568+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-03T23-34-11-988Z_01a1041e-3912-7708-91db-c07e85df627c.jsonl",
+    "harness": "pi",
+    "id": "01a1041e-3912-7708-91db-c07e85df627c",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T12:12:01.019256+00:00",
+    "loads": [
+      {
+        "skill": "frontend-design",
+        "line": 7,
+        "tool": "codemode"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 76,
+        "tool": "read"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 91,
+        "tool": "codemode"
+      },
+      {
+        "skill": "animate",
+        "line": 99,
+        "tool": "codemode"
+      },
+      {
+        "skill": "animate",
+        "line": 207,
+        "tool": "codemode"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 207,
+        "tool": "codemode"
+      },
+      {
+        "skill": "writing-for-agents",
+        "line": 209,
+        "tool": "codemode"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 331,
+        "tool": "codemode"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 410,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-04T00-27-04-389Z_01a1044e-a144-7221-9250-40bc579533bb.jsonl",
+    "harness": "pi",
+    "id": "01a1044e-a144-7221-9250-40bc579533bb",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T00:27:53.175778+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-01T23-17-14-266Z_01a0f9c1-f999-7037-a4b9-6fce516a0b0c.jsonl",
+    "harness": "pi",
+    "id": "01a0f9c1-f999-7037-a4b9-6fce516a0b0c",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T00:26:49.917461+00:00",
+    "loads": [
+      {
+        "skill": "research",
+        "line": 9,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 61,
+        "tool": "read"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 117,
+        "tool": "read"
+      },
+      {
+        "skill": "tdd",
+        "line": 117,
+        "tool": "read"
+      },
+      {
+        "skill": "writing-for-agents",
+        "line": 117,
+        "tool": "read"
+      },
+      {
+        "skill": "writing-for-agents",
+        "line": 375,
+        "tool": "read"
+      },
+      {
+        "skill": "domain-modeling",
+        "line": 375,
+        "tool": "read"
+      },
+      {
+        "skill": "research",
+        "line": 763,
+        "tool": "read"
+      },
+      {
+        "skill": "writing-for-agents",
+        "line": 822,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 863,
+        "tool": "read"
+      },
+      {
+        "skill": "writing-for-agents",
+        "line": 898,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 1025,
+        "tool": "read"
+      },
+      {
+        "skill": "domain-modeling",
+        "line": 1245,
+        "tool": "read"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 1469,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 1517,
+        "tool": "read"
+      },
+      {
+        "skill": "research",
+        "line": 1563,
+        "tool": "read"
+      },
+      {
+        "skill": "research",
+        "line": 1773,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 1932,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 2063,
+        "tool": "read"
+      }
+    ],
+    "requests": [
+      "bro"
+    ]
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-04T00-12-37-724Z_01a10441-67da-74e0-9240-1e5b620317c8.jsonl",
+    "harness": "pi",
+    "id": "01a10441-67da-74e0-9240-1e5b620317c8",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-04T00:17:35.575682+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-xr-learning-app--/2026-10-03T23-33-04-310Z_01a1041d-30b3-7380-9b0b-2973e7296b98.jsonl",
+    "harness": "pi",
+    "id": "01a1041d-30b3-7380-9b0b-2973e7296b98",
+    "cwd": "/root/xr-learning-app",
+    "last_modified": "2026-10-04T00:14:22.996722+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 177,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 191,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-04T00-03-38-806Z_01a10439-2eb1-7231-8e45-40c5bb9280b2.jsonl",
+    "harness": "pi",
+    "id": "01a10439-2eb1-7231-8e45-40c5bb9280b2",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-04T00:11:14.313782+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding-phoget--/2026-10-03T21-07-19-640Z_01a10397-c1d7-77a3-9e00-75713738b23f.jsonl",
+    "harness": "pi",
+    "id": "01a10397-c1d7-77a3-9e00-75713738b23f",
+    "cwd": "/root/cb-coding/phoget",
+    "last_modified": "2026-10-04T00:10:57.224697+00:00",
+    "loads": [
+      {
+        "skill": "frontend-design",
+        "line": 44,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 250,
+        "tool": "codemode"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 250,
+        "tool": "codemode"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 252,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-03T22-24-23-737Z_01a103de-50b8-767c-896a-fa1216146472.jsonl",
+    "harness": "pi",
+    "id": "01a103de-50b8-767c-896a-fa1216146472",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-03T23:13:53.801696+00:00",
+    "loads": [
+      {
+        "skill": "research",
+        "line": 14,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding-herdr-fernblick--/2026-10-03T22-45-40-258Z_01a103f1-cb21-70f8-9575-8e935fdff7c5.jsonl",
+    "harness": "pi",
+    "id": "01a103f1-cb21-70f8-9575-8e935fdff7c5",
+    "cwd": "/root/cb-coding/herdr-fernblick",
+    "last_modified": "2026-10-03T22:56:06.167354+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 9,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding--/2026-10-03T22-23-50-270Z_01a103dd-cdfd-74d7-8282-0f1e687b6ed7.jsonl",
+    "harness": "pi",
+    "id": "01a103dd-cdfd-74d7-8282-0f1e687b6ed7",
+    "cwd": "/root/cb-coding",
+    "last_modified": "2026-10-03T22:26:17.870527+00:00",
+    "loads": [],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding-workout-app--/2026-10-01T23-26-47-566Z_01a0f9ca-b90d-723e-b018-40264575fb88.jsonl",
+    "harness": "pi",
+    "id": "01a0f9ca-b90d-723e-b018-40264575fb88",
+    "cwd": "/root/cb-coding/workout-app",
+    "last_modified": "2026-10-03T22:05:23.542322+00:00",
+    "loads": [
+      {
+        "skill": "frontend-design",
+        "line": 9,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 89,
+        "tool": "read"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 183,
+        "tool": "read"
+      },
+      {
+        "skill": "codebase-design",
+        "line": 277,
+        "tool": "read"
+      },
+      {
+        "skill": "frontend-design",
+        "line": 317,
+        "tool": "read"
+      },
+      {
+        "skill": "diagnosing-bugs",
+        "line": 370,
+        "tool": "read"
+      },
+      {
+        "skill": "code-review",
+        "line": 370,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-rb-imconsult-febop-job-sheet--/2026-10-03T20-59-28-074Z_01a10390-8fc7-7483-9038-cf2599057ff6.jsonl",
+    "harness": "pi",
+    "id": "01a10390-8fc7-7483-9038-cf2599057ff6",
+    "cwd": "/root/rb-imconsult/febop-job-sheet",
+    "last_modified": "2026-10-03T21:57:14.364879+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 12,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-cb-coding-shelf--/2026-10-03T21-05-05-662Z_01a10395-b67d-76e8-adae-4e038caf817b.jsonl",
+    "harness": "pi",
+    "id": "01a10395-b67d-76e8-adae-4e038caf817b",
+    "cwd": "/root/cb-coding/shelf",
+    "last_modified": "2026-10-03T21:15:55.545515+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 7,
+        "tool": "read"
+      }
+    ],
+    "requests": []
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-rb-imconsult-febop-job-sheet--/2026-10-03T15-55-06-352Z_01a10279-e8ef-7483-9038-cf228b29c6de.jsonl",
+    "harness": "pi",
+    "id": "01a10279-e8ef-7483-9038-cf228b29c6de",
+    "cwd": "/root/rb-imconsult/febop-job-sheet",
+    "last_modified": "2026-10-03T17:21:07.876935+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 8,
+        "tool": "codemode"
+      },
+      {
+        "skill": "herdr",
+        "line": 43,
+        "tool": "read"
+      }
+    ],
+    "requests": [
+      "bro"
+    ]
+  },
+  {
+    "file": "/root/.pi/agent/sessions/--root-rb-imconsult-FeBOp-design-system--/2026-10-03T16-00-54-961Z_01a1027f-3ab0-758f-91ea-a8a23767ec6b.jsonl",
+    "harness": "pi",
+    "id": "01a1027f-3ab0-758f-91ea-a8a23767ec6b",
+    "cwd": "/root/rb-imconsult/FeBOp-design-system",
+    "last_modified": "2026-10-03T16:33:09.479435+00:00",
+    "loads": [
+      {
+        "skill": "diagnosing-bugs",
+        "line": 9,
+        "tool": "codemode"
+      },
+      {
+        "skill": "pi-code-review",
+        "line": 45,
+        "tool": "read"
+      },
+      {
+        "skill": "code-review",
+        "line": 47,
+        "tool": "read"
+      },
+      {
+        "skill": "code-review",
+        "line": 53,
+        "tool": "codemode"
+      },
+      {
+        "skill": "code-review",
+        "line": 91,
+        "tool": "codemode"
+      }
+    ],
+    "requests": []
+  }
+]
