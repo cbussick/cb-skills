@@ -45,7 +45,10 @@ npx --yes skills@latest remove <skill-name> -y
 ```
 
 After adding or removing a skill, run `./scripts/install.sh` again. You do not
-need to run it after an update because the existing links still work.
+need to run it after an update because the existing links still work. If you
+pull a change that removes skills from `skills-lock.json`, run the project-scoped
+`skills remove <skill-name> -y` for each removed skill to delete its downloaded
+copy. The installer unlinks removed skills but does not delete downloaded files.
 
 Include `--agent codex claude-code` when adding skills: Codex selects the shared
 `.agents/skills` destination, and Claude Code gets a link to it. Selecting only
