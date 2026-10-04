@@ -11,15 +11,7 @@ targetRoots=(
 )
 
 shopt -s nullglob
-skillFiles=(
-  "$repoRoot"/*/SKILL.md
-  "$managedSkillsRoot"/*/SKILL.md
-)
-
-if ((${#skillFiles[@]} == 0)); then
-  echo "No skills found in $repoRoot" >&2
-  exit 1
-fi
+skillFiles=("$repoRoot"/*/SKILL.md)
 
 if [[ -f $lockFile ]]; then
   if ! command -v node >/dev/null 2>&1; then
@@ -44,6 +36,23 @@ if [[ -f $lockFile ]]; then
     echo "Run: npx --yes skills@latest experimental_install" >&2
     exit 1
   fi
+
+  # A restored checkout may still have downloaded skills removed from the lock.
+  # Only link third-party skills that this repo currently declares.
+  while IFS= read -r skillName; do
+    skillFiles+=("$managedSkillsRoot/$skillName/SKILL.md")
+  done < <(node -e '
+    const fs = require("fs");
+    const lock = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    for (const name of Object.keys(lock.skills)) console.log(name);
+  ' "$lockFile")
+else
+  skillFiles+=("$managedSkillsRoot"/*/SKILL.md)
+fi
+
+if ((${#skillFiles[@]} == 0)); then
+  echo "No skills found in $repoRoot" >&2
+  exit 1
 fi
 
 skillDirs=()
