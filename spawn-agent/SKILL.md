@@ -1,7 +1,6 @@
 ---
 name: spawn-agent
 description: Spawn another Pi agent and give it a task.
-disable-model-invocation: true
 ---
 
 # Spawn Agent
