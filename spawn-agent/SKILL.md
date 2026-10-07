@@ -1,6 +1,6 @@
 ---
 name: spawn-agent
-description: Spawn another Pi agent and give it a task.
+description: Spawn another Pi agent and give it a task. Use when the user asks to spawn, summon, launch, or create a new agent, or delegate a task to another agent.
 ---
 
 # Spawn Agent
