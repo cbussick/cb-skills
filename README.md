@@ -15,7 +15,7 @@ that contain a `SKILL.md` file.
 # 1. Download the skills listed in skills-lock.json:
 npx --yes skills@latest experimental_install
 
-# 2. Make every skill available to the agents on this machine:
+# 2. Apply local skill policy and link skills for the agents on this machine:
 ./scripts/install.sh
 ```
 
@@ -37,16 +37,18 @@ Run these commands from this repo so they update `skills-lock.json`:
 # Add one skill:
 npx --yes skills@latest add <owner>/<repository> --skill <skill-name> --agent codex claude-code -y
 
-# Update the skills already listed in skills-lock.json:
-npx --yes skills@latest update -p
+# Update locked skills, reapply local policy, and refresh links:
+./scripts/update.sh
 
 # Remove one skill:
 npx --yes skills@latest remove <skill-name> -y
 ```
 
-After adding or removing a skill, run `./scripts/install.sh` again. You do not
-need to run it after an update because the existing links still work. If you
-pull a change that removes skills from `skills-lock.json`, run the project-scoped
+After adding, removing, or restoring a skill, run `./scripts/install.sh` again.
+Use `./scripts/update.sh` for updates: it runs the Skills CLI, reapplies policy,
+and refreshes links. If you update through the CLI directly, rerun the installer
+before using an agent. If you pull a change that removes skills from
+`skills-lock.json`, run the project-scoped
 `skills remove <skill-name> -y` for each removed skill to delete its downloaded
 copy. The installer unlinks removed skills but does not delete downloaded files.
 
@@ -60,6 +62,36 @@ the generated links in `.claude/skills`.
 
 Use the commands above without `-g`. Global commands write into the same
 folders managed by `install.sh` and can conflict with its links.
+
+### Local skill policy
+
+`skills-policy.json` lists downloaded skills that should be manual-only. Anatomy
+is currently the only entry. `scripts/apply-skill-policy.mjs` sets
+`disable-model-invocation: true` in their `SKILL.md` frontmatter and
+`policy.allow_implicit_invocation: false` in `agents/openai.yaml`, creating that
+metadata file if needed. Skill bodies and other metadata are preserved.
+
+The installer calls this script before creating links. The update wrapper also
+calls it after the Skills CLI returns, even on failure, because a partial update
+may already have overwritten files. Repeated runs do not rewrite unchanged files.
+Unexpected metadata layouts fail with an error instead of silently skipping the
+policy. The script supports block-style YAML for these settings, not inline
+policy mappings or aliases.
+
+The patch script and policy are tracked; downloaded copies remain ignored. The
+lockfile continues to describe upstream content, not our local invocation flags.
+To make a listed skill automatic again, remove its policy entry, restore that
+skill's upstream copy, and rerun the installer. Removing the entry alone does not
+undo an already applied patch.
+
+Invoke Anatomy explicitly with `/skill:anatomy` in Pi, `/anatomy` in Claude Code,
+or `$anatomy` in Codex. Reload or start a new agent session after changing policy.
+
+Run policy and installer/update tests without downloading updates:
+
+```bash
+node --test scripts/apply-skill-policy.test.mjs
+```
 
 ### Check for new skills
 
@@ -106,3 +138,22 @@ The toolkit stays in the user's data directory, not in this repo. Create an
 independent workspace with `bash lantern/scripts/lantern.sh new <new-directory>`.
 See [portable setup and updates](lantern/references/setup.md) for prerequisites,
 storage overrides, and verification. No dotfiles changes are required.
+
+### Lantern Voice (manual only)
+
+`lantern-voice` produces a complete English-narrated explainer from a topic,
+code, or plan. It uses Google Cloud TTS's `en-US-Chirp3-HD-Despina` voice.
+Use `/skill:lantern-voice <topic>` in Pi, `/lantern-voice <topic>` in Claude Code,
+or `$lantern-voice <topic>` in Codex.
+
+```bash
+node lantern-voice/scripts/voice.mjs setup
+./scripts/install.sh
+```
+
+It shares the Lantern installer, not the `/lantern` skill workflow. Install
+`gcloud` through `cb-dotfiles`, then run `gcloud init --console-only` in your
+terminal to sign in and select the existing Google project. The skill uses that
+normal CLI login; no private key or second login is needed. Login state and
+cached audio stay machine-local. See
+[setup, sign-in, and verification](lantern-voice/references/setup.md).

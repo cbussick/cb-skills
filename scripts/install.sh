@@ -73,6 +73,9 @@ for skillFile in "${skillFiles[@]}"; do
   skillDirs+=("$skillDir")
 done
 
+# Reapply local invocation settings after Skills CLI restores or updates downloads.
+node "$repoRoot/scripts/apply-skill-policy.mjs"
+
 isCurrentSkill() {
   local candidateName=$1
 

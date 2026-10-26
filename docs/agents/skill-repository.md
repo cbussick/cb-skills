@@ -7,7 +7,10 @@ behavior.
 ## Skill ownership
 
 - Treat `.agents/skills/` as installed third-party dependencies. It is managed
-  by the Skills CLI, ignored by Git, and must not be edited manually.
+  by the Skills CLI, ignored by Git, and must not be edited manually. The only
+  generated overrides are applied by `scripts/apply-skill-policy.mjs`, according
+  to `skills-policy.json`; see the root README's
+  [local skill policy](../../README.md#local-skill-policy).
 - Treat top-level directories containing `SKILL.md` as repository-owned or
   intentionally vendored skills. Edit and commit those directories normally.
 
@@ -29,8 +32,9 @@ behavior.
 
 - Run `./scripts/install.sh` after adding or removing a skill. The installer
   creates or removes links in `~/.agents/skills` and `~/.claude/skills`.
-- Updating an existing skill does not require rerunning the installer because
-  its existing links already point into this checkout.
+- Use `./scripts/update.sh` for updates. It reapplies policy and runs the
+  installer. After direct Skills CLI updates or restores, rerun
+  `./scripts/install.sh` before using an agent so invocation policy is restored.
 - Do not replace non-symlink files or directories in the global skill roots.
   The installer intentionally treats them as conflicts.
 - Start a new agent session after adding a skill so the agent discovers it.
