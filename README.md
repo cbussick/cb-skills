@@ -87,3 +87,22 @@ you want.
 These skills live in top-level folders containing a `SKILL.md` file. Edit and
 commit them like any other files. After adding or removing one, run
 `./scripts/install.sh`.
+
+### Lantern technical explainers (manual only)
+
+`lantern` creates animated, step-through explanations of code, plans,
+architecture, algorithms, bugs, or diffs. It is excluded from automatic model
+invocation. Use `/skill:lantern <topic>` in Pi, `/lantern <topic>` in Claude Code,
+or `$lantern <topic>` in Codex.
+
+After linking skills, install its pinned toolkit and optional Chromium checks:
+
+```bash
+bash lantern/scripts/lantern.sh setup
+bash lantern/scripts/lantern.sh browser
+```
+
+The toolkit stays in the user's data directory, not in this repo. Create an
+independent workspace with `bash lantern/scripts/lantern.sh new <new-directory>`.
+See [portable setup and updates](lantern/references/setup.md) for prerequisites,
+storage overrides, and verification. No dotfiles changes are required.

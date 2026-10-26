@@ -1,0 +1,6 @@
+interface:
+  display_name: "Lantern Explainer"
+  short_description: "Build animated technical explainers with Lantern"
+  default_prompt: "Use $lantern to build an animated, step-through explanation of this topic."
+policy:
+  allow_implicit_invocation: false
