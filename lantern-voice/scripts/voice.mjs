@@ -3,7 +3,7 @@ import { resolve, join, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { inspectScene, buildNarration } from './build.mjs';
-import { voiceName } from './speech.mjs';
+import { getVoice } from './speech.mjs';
 import { createGoogleSynthesizer } from './googleSpeech.mjs';
 
 const skillDirectory = fileURLToPath(new URL('../', import.meta.url));
@@ -22,10 +22,11 @@ async function main(args) {
     console.log(`Usage: node voice.mjs COMMAND
   setup                                  Check gcloud and install Lantern
   new DIRECTORY                          Create an independent Lantern workspace
-  plan WORKSPACE MODULE EXPORT           Inspect captions without calling Google
-  build WORKSPACE MODULE EXPORT [--generate]
+  plan WORKSPACE MODULE EXPORT [--language en-US|de-DE]
+                                         Inspect captions without calling Google
+  build WORKSPACE MODULE EXPORT [--language en-US|de-DE] [--generate]
                                          Build from cached audio; --generate permits Google calls
-Voice is fixed to ${voiceName}. Modules are workspace-relative paths.`);
+Default: en-US (Despina). German: de-DE (Achernar). Modules are workspace-relative paths.`);
     return;
   }
   if (!isAbsolute(dataDirectory)) throw new Error('LANTERN_VOICE_HOME / XDG_DATA_HOME must be absolute.');
@@ -41,12 +42,29 @@ Voice is fixed to ${voiceName}. Modules are workspace-relative paths.`);
     return;
   }
   if (!['plan', 'build'].includes(command)) throw new Error('Unknown command. Run with --help.');
-  const allowGeneration = rest.includes('--generate');
-  const positional = rest.filter((argument) => argument !== '--generate');
+  let allowGeneration = false;
+  let language = 'en-US';
+  let hasLanguage = false;
+  const positional = [];
+  for (let index = 0; index < rest.length; index++) {
+    const argument = rest[index];
+    if (argument === '--generate') {
+      if (allowGeneration) throw new Error('Duplicate --generate.');
+      allowGeneration = true;
+    } else if (argument === '--language') {
+      if (hasLanguage || !rest[index + 1] || rest[index + 1].startsWith('--')) throw new Error('Provide --language en-US or de-DE once.');
+      hasLanguage = true;
+      language = rest[++index];
+    } else {
+      if (argument.startsWith('--')) throw new Error(`Unknown option: ${argument}`);
+      positional.push(argument);
+    }
+  }
+  const voice = getVoice(language);
   if (positional.length !== 3 || (command === 'plan' && allowGeneration)) throw new Error('Provide WORKSPACE MODULE EXPORT; only build accepts --generate.');
-  const scene = await inspectScene(...positional);
+  const scene = await inspectScene(...positional, language);
   if (command === 'plan') {
-    console.log(JSON.stringify({ voice: voiceName, steps: scene.trace.steps.map((step) => ({
+    console.log(JSON.stringify({ language, voice: voice.name, steps: scene.trace.steps.map((step) => ({
       step: step.step, caption: step.meta.caption, bytes: Buffer.byteLength(step.meta.caption, 'utf8'),
     })) }, null, 2));
     return;

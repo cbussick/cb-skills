@@ -2,7 +2,7 @@ import { readFile, mkdir, writeFile, realpath } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { resolve, join, basename, relative, isAbsolute } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { prepareClips, assembleNarration, voiceName, speechRequest } from './speech.mjs';
+import { prepareClips, assembleNarration, getVoice, speechRequest } from './speech.mjs';
 import { makeNarratedScene, validateSteps } from './timing.mjs';
 
 const skillDirectory = fileURLToPath(new URL('../', import.meta.url));
@@ -66,7 +66,8 @@ export function narratedPlayer(source) {
   return replaceOnce(text, fonts, '  // Offline player: scene fonts are embedded; UI uses local fallback fonts.');
 }
 
-export async function inspectScene(workspace, modulePath, exportName) {
+export async function inspectScene(workspace, modulePath, exportName, language = 'en-US') {
+  getVoice(language);
   const root = await realpath(workspace);
   const module = await realpath(resolve(root, modulePath));
   const location = relative(root, module);
@@ -81,17 +82,19 @@ export async function inspectScene(workspace, modulePath, exportName) {
   const trace = await api.traceScene(Scene);
   validateSteps(trace);
   // Validate every input before any call to Google.
-  for (const step of trace.steps) speechRequest(step.meta.caption);
+  for (const step of trace.steps) speechRequest(step.meta.caption, language);
 
-  return { root, module, exportName, key, Scene, api, trace };
+  return { root, module, exportName, key, Scene, api, trace, language };
 }
 
 export async function buildNarration(scene, cacheDirectory, synthesize) {
+  const language = scene.language ?? 'en-US';
+  const voice = getVoice(language);
   // Fail on unsupported player versions before generating billable speech.
   narratedPlayer(await readFile(join(scene.root, 'app/player.ts'), 'utf8'));
   const requireWorkspace = createRequire(join(scene.root, 'package.json'));
   const { build } = requireWorkspace('esbuild');
-  const clips = await prepareClips(scene.trace.steps, cacheDirectory, synthesize);
+  const clips = await prepareClips(scene.trace.steps, cacheDirectory, synthesize, language);
   const durations = Object.fromEntries(clips.map((clip) => [clip.step, clip.duration]));
   const NarratedScene = makeNarratedScene(scene.Scene, durations);
   const trace = await scene.api.traceScene(NarratedScene);
@@ -143,16 +146,16 @@ document.querySelector('.actions').append(mute);`;
   });
   const css = await readFile(join(scene.root, 'app/player.css'), 'utf8');
   const js = result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lantern Voice</title><style>${css}</style></head><body><main></main><p style="padding:0 24px;font:12px system-ui;color:#888">AI-generated English narration · Google Chirp 3 HD · Despina. Press Play to start.</p><script type="module">${js}</script></body></html>`;
+  const html = `<!doctype html><html lang="${voice.htmlLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lantern Voice</title><style>${css}</style></head><body><main></main><p style="padding:0 24px;font:12px system-ui;color:#888">AI-generated ${voice.label} narration · Google Chirp 3 HD · ${voice.speaker}. Press Play to start.</p><script type="module">${js}</script></body></html>`;
   const outputDirectory = join(scene.root, 'out/voice', scene.key);
   await mkdir(outputDirectory, { recursive: true });
   await writeFile(join(outputDirectory, 'index.html'), html);
   await writeFile(join(outputDirectory, 'narration.wav'), wav);
-  const manifest = { voice: voiceName, module: relative(scene.root, scene.module), exportName: scene.exportName, trace,
+  const manifest = { language, voice: voice.name, module: relative(scene.root, scene.module), exportName: scene.exportName, trace,
     clips: clips.map(({ step, hash, duration }) => ({ step, hash, duration })) };
   await writeFile(join(outputDirectory, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   const transcript = trace.steps.map((step) => `## ${step.step} (${step.t0.toFixed(2)}–${step.t1.toFixed(2)}s)\n\n${step.meta.caption}\n`).join('\n');
-  await writeFile(join(outputDirectory, 'transcript.md'), `# English narration\n\n${transcript}`);
+  await writeFile(join(outputDirectory, 'transcript.md'), `# ${voice.label} narration\n\n${transcript}`);
 
   return { path: join(outputDirectory, 'index.html'), manifest };
 }

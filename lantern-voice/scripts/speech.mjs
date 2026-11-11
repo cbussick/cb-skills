@@ -2,18 +2,27 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export const voiceName = 'en-US-Chirp3-HD-Despina';
+const voices = {
+  'en-US': { name: 'en-US-Chirp3-HD-Despina', label: 'English', htmlLang: 'en', speaker: 'Despina' },
+  'de-DE': { name: 'de-DE-Chirp3-HD-Achernar', label: 'German', htmlLang: 'de', speaker: 'Achernar' },
+};
+export function getVoice(language = 'en-US') {
+  if (!Object.hasOwn(voices, language)) throw new Error('Unsupported language. Use en-US or de-DE.');
+  return voices[language];
+}
+export const voiceName = getVoice().name;
 export const sampleRate = 24000;
 const bytesPerSample = 2;
 const maxInputBytes = 5000;
 
-export function speechRequest(text) {
-  if (typeof text !== 'string' || !text.trim()) throw new Error('Every step needs an English caption.');
+export function speechRequest(text, language = 'en-US') {
+  const voice = getVoice(language);
+  if (typeof text !== 'string' || !text.trim()) throw new Error('Every step needs a caption.');
   if (Buffer.byteLength(text, 'utf8') > maxInputBytes) throw new Error('Caption exceeds 5,000 UTF-8 bytes. Split the step.');
 
   return {
     input: { text },
-    voice: { languageCode: 'en-US', name: voiceName },
+    voice: { languageCode: language, name: voice.name },
     audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: sampleRate },
   };
 }
@@ -67,9 +76,10 @@ export function writeWav(pcm) {
   return Buffer.concat([header, pcm]);
 }
 
-export async function prepareClips(steps, cacheDirectory, synthesize) {
+export async function prepareClips(steps, cacheDirectory, synthesize, language = 'en-US') {
+  getVoice(language);
   // Validate all requests before incurring any usage charges.
-  const requests = steps.map((step) => speechRequest(step.meta?.caption));
+  const requests = steps.map((step) => speechRequest(step.meta?.caption, language));
   await mkdir(cacheDirectory, { recursive: true, mode: 0o700 });
   const clips = [];
 

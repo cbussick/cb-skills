@@ -1,14 +1,17 @@
 ---
 name: lantern-voice
-description: Build an English-narrated, animated technical explainer with Lantern and Google TTS.
+description: Build an English- or German-narrated animated technical explainer with Lantern and Google TTS.
 disable-model-invocation: true
 ---
 
 # Lantern Voice
 
 Produce a narrated explainer from a topic, code, a plan, a design, or a bug.
-Write all narration and on-screen explanation in English. Speech uses Google
-Cloud Text-to-Speech's `en-US-Chirp3-HD-Despina` voice.
+Use the user's requested language for narration and on-screen explanation;
+English is the default. Google Cloud Text-to-Speech uses `en-US-Chirp3-HD-Despina`
+for English and `de-DE-Chirp3-HD-Achernar` for German. For German explainers,
+pass `--language de-DE` to both `plan` and `build`; otherwise the CLI uses English.
+Language selection chooses the voice; author captions in that language.
 
 Resolve bundled paths relative to this skill directory. Read
 [setup and commands](references/setup.md) before installation, sign-in setup,
@@ -21,7 +24,7 @@ Choose the audience, the question to answer, and one concrete example to trace.
 Support central claims with source references; label proposals and assumptions.
 
 Create a workspace with the bundled CLI's `new` command, or use one designated
-by the user. Write `storyboard.md` with each step's idea, English narration,
+by the user. Write `storyboard.md` with the chosen language and each step's idea, narration,
 visual change, and supporting source. Record the Lantern revision. Show causality
 while keeping object identity and color meaning stable.
 
@@ -29,7 +32,7 @@ while keeping object identity and color meaning stable.
 
 Read the workspace's `README.md`, `src/index.ts`, and a relevant example. Use a
 TypeScript module with a named scene-class export. Begin at time zero with a
-named step; give every step a unique kebab-case name and an English `meta.caption`.
+named step; give every step a unique kebab-case name and a `meta.caption` in the chosen language.
 Captions are the narration's source of truth. Keep `this.state` consistent with
 the visuals, and scene logic independent of elapsed time.
 

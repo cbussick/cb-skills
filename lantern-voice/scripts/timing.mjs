@@ -2,7 +2,7 @@ const tailSeconds = 0.2;
 
 export function validateSteps(trace) {
   const names = new Set();
-  if (!trace.steps.length) throw new Error('Scene needs named steps with English captions.');
+  if (!trace.steps.length) throw new Error('Scene needs named steps with captions.');
   if (trace.steps[0].t0 !== 0) throw new Error('Begin the scene with a named step at time zero.');
 
   for (const step of trace.steps) {
@@ -11,7 +11,7 @@ export function validateSteps(trace) {
     }
     names.add(step.step);
     if (typeof step.meta?.caption !== 'string' || !step.meta.caption.trim()) {
-      throw new Error(`Step ${step.step} needs an English meta.caption.`);
+      throw new Error(`Step ${step.step} needs a meta.caption.`);
     }
   }
 }

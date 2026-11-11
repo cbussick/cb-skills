@@ -1,6 +1,6 @@
 interface:
   display_name: "Lantern Voice"
-  short_description: "Build English-narrated technical explainers"
-  default_prompt: "Use $lantern-voice to build an English-narrated animated explanation of this topic."
+  short_description: "Build English or German narrated technical explainers"
+  default_prompt: "Use $lantern-voice to build a narrated animated explanation of this topic in the requested language (English by default, or German)."
 policy:
   allow_implicit_invocation: false

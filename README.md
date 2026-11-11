@@ -141,7 +141,7 @@ storage overrides, and verification. No dotfiles changes are required.
 
 ### Lantern Voice (manual only)
 
-`lantern-voice` produces a complete English-narrated explainer from a topic,
+`lantern-voice` produces a complete English- or German-narrated explainer from a topic,
 code, or plan. It uses Google Cloud TTS's `en-US-Chirp3-HD-Despina` voice.
 Use `/skill:lantern-voice <topic>` in Pi, `/lantern-voice <topic>` in Claude Code,
 or `$lantern-voice <topic>` in Codex.

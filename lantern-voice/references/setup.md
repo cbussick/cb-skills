@@ -1,6 +1,6 @@
 # Setup and commands
 
-This skill uses the same Google Cloud TTS API and English voice as Vokhanhbel.
+This skill uses the same Google Cloud TTS API and English/German voices as Vokhanhbel.
 It does not depend on that app or invoke another skill. It shares the adjacent
 `lantern/scripts/lantern.sh` installer and its upstream pin; keep both directories
 when syncing `cb-skills`.
@@ -91,6 +91,18 @@ node lantern-voice/scripts/voice.mjs plan "$HOME/Documents/explainers/cache-desi
 node lantern-voice/scripts/voice.mjs build "$HOME/Documents/explainers/cache-design" scenes/cache-design.ts CacheDesign --generate
 ```
 
+English is the default. For a German explainer, write German captions and
+on-screen explanations, then pass `--language de-DE` to both commands:
+
+```bash
+node lantern-voice/scripts/voice.mjs plan "$HOME/Documents/explainers/cache-design" scenes/cache-design.ts CacheDesign --language de-DE
+node lantern-voice/scripts/voice.mjs build "$HOME/Documents/explainers/cache-design" scenes/cache-design.ts CacheDesign --language de-DE --generate
+```
+
+`--language en-US` explicitly selects English. The flag selects a voice, not
+translation; captions are synthesized as written. Use the same flag on every
+rebuild. Both languages share the existing Google login and project.
+
 These commands import and run the scene as JavaScript; use trusted workspace code.
 `plan` prints captions and byte counts without calling Google. `build --generate`
 sends missing captions to Google; `build` without the flag fails if audio is not
@@ -100,8 +112,8 @@ voice and format. A corrupt cached file is reported rather than silently replace
 
 ## Timing and output
 
-The voice is fixed to `en-US-Chirp3-HD-Despina`. Audio is **mono 24 kHz LINEAR16
-WAV**, rather than Vokhanhbel's MP3 output. WAV gives exact sample-based durations
+English uses `en-US-Chirp3-HD-Despina`; German uses `de-DE-Chirp3-HD-Achernar`.
+Audio is **mono 24 kHz LINEAR16 WAV**, rather than Vokhanhbel's MP3 output. WAV gives exact sample-based durations
 and lets the builder insert silence without FFmpeg or another decoder.
 
 A scene wrapper extends each step to fit its clip plus a 0.2-second tail, rounded
@@ -119,8 +131,8 @@ Outputs under `out/voice/<scene-name>/`:
 
 - `index.html`: offline player with embedded audio; this file alone can be shared.
 - `narration.wav`: the full track, for inspection or reuse.
-- `manifest.json`: voice, clip hashes, durations, step state, and final timeline.
-- `transcript.md`: English narration with step timings.
+- `manifest.json`: language, voice, clip hashes, durations, step state, and final timeline.
+- `transcript.md`: narration in the chosen language with step timings.
 
 WAV embedding produces larger HTML than compressed audio. Builds are limited to
 30 minutes. The builder includes only the selected module and its imports, omits

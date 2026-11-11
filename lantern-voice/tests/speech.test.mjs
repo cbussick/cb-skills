@@ -11,13 +11,41 @@ const step = (name, caption) => ({ step: name, t0: 0, t1: 2, meta: { caption } }
 const tone = (duration) => writeWav(Buffer.alloc(Math.round(duration * sampleRate) * 2, 1));
 
 // Synthetic audio here tests timing, not speech quality; no Google requests are made.
-test('synthesis is fixed to English Despina and measurable mono WAV', () => {
+test('synthesis defaults to English Despina and measurable mono WAV', () => {
   assert.deepEqual(speechRequest('A request arrives.'), {
     input: { text: 'A request arrives.' }, voice: { languageCode: 'en-US', name: voiceName },
     audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: sampleRate },
   });
   assert.throws(() => speechRequest(' '));
   assert.throws(() => speechRequest('é'.repeat(2501)), /5,000/);
+});
+
+test('German uses Vokhanhbel Achernar; unsupported languages are rejected', () => {
+  assert.deepEqual(speechRequest('Eine Anfrage kommt an.', 'de-DE'), {
+    input: { text: 'Eine Anfrage kommt an.' },
+    voice: { languageCode: 'de-DE', name: 'de-DE-Chirp3-HD-Achernar' },
+    audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: sampleRate },
+  });
+  assert.throws(() => speechRequest('Bonjour.', 'fr-FR'), /Unsupported language/);
+  assert.throws(() => speechRequest('Hallo.', 'toString'), /Unsupported language/);
+});
+
+test('language changes use separate cached clips without invalidating English', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'lantern-voice-language-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const requests = [];
+  const synthesize = async (request) => { requests.push(request); return tone(0.5); };
+  const steps = [step('same', 'Hello / Hallo.')];
+  const english = await prepareClips(steps, directory, synthesize);
+  await assert.rejects(prepareClips(steps, directory, undefined, 'de-DE'), /--generate/);
+  const german = await prepareClips(steps, directory, synthesize, 'de-DE');
+  assert.notEqual(english[0].hash, german[0].hash);
+  assert.equal(requests[1].voice.name, 'de-DE-Chirp3-HD-Achernar');
+  await prepareClips(steps, directory, undefined, 'de-DE');
+  await prepareClips(steps, directory);
+  assert.equal(requests.length, 2);
+  await assert.rejects(prepareClips(steps, directory, synthesize, 'fr-FR'), /Unsupported language/);
+  assert.equal(requests.length, 2);
 });
 
 test('WAV duration comes from samples, not estimates; malformed audio is rejected', () => {

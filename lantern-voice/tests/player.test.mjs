@@ -14,6 +14,31 @@ test('unsupported players fail closed', () => {
   assert.throws(() => narratedPlayer('different player'), /pinned version/);
 });
 
+test('German artifact carries Achernar voice and German language metadata', { skip: !workspace }, async (t) => {
+  const cache = await mkdtemp(join(tmpdir(), 'lantern-voice-german-'));
+  t.after(() => rm(cache, { recursive: true, force: true }));
+  await writeFile(join(workspace, 'scenes/voice-german-test.ts'), `import { Scene } from '../src/index.ts';
+export class GermanTest extends Scene {
+  override async construct() {
+    await this.step('anfrage', { caption: 'Eine Anfrage kommt an.' });
+    await this.wait(0.3);
+  }
+}`);
+  const scene = await inspectScene(workspace, 'scenes/voice-german-test.ts', 'GermanTest', 'de-DE');
+  const result = await buildNarration(scene, cache, async (request) => {
+    assert.equal(request.voice.languageCode, 'de-DE');
+    assert.equal(request.voice.name, 'de-DE-Chirp3-HD-Achernar');
+    return writeWav(Buffer.alloc(sampleRate * 2));
+  });
+  assert.equal(result.manifest.language, 'de-DE');
+  assert.equal(result.manifest.voice, 'de-DE-Chirp3-HD-Achernar');
+  const html = await readFile(result.path, 'utf8');
+  assert.match(html, /<html lang="de">/);
+  assert.match(html, /German narration · Google Chirp 3 HD · Achernar/);
+  assert.match(await readFile(join(workspace, 'out/voice/voice-german-test/transcript.md'), 'utf8'), /# German narration\n\n[\s\S]*Eine Anfrage kommt an\./);
+  await buildNarration(scene, cache);
+});
+
 test('narrated artifact: offline build, audio timing, pause, seek, step mode, mute, and restart', { skip: !workspace }, async (t) => {
   const cache = await mkdtemp(join(tmpdir(), 'lantern-voice-browser-cache-'));
   t.after(() => rm(cache, { recursive: true, force: true }));
