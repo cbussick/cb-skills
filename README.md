@@ -152,8 +152,9 @@ node lantern-voice/scripts/voice.mjs setup
 ```
 
 It shares the Lantern installer, not the `/lantern` skill workflow. Install
-`gcloud` through `cb-dotfiles`, then run `gcloud init --console-only` in your
-terminal to sign in and select the existing Google project. The skill uses that
+`gcloud` using [Google's CLI installer](https://docs.cloud.google.com/sdk/docs/install-sdk).
+Then run `gcloud init --console-only` in your terminal to sign in and select the
+Google Cloud project to use for speech. The skill uses that
 normal CLI login; no private key or second login is needed. Login state and
 cached audio stay machine-local. See
 [setup, sign-in, and verification](lantern-voice/references/setup.md).

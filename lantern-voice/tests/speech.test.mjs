@@ -20,7 +20,7 @@ test('synthesis defaults to English Despina and measurable mono WAV', () => {
   assert.throws(() => speechRequest('é'.repeat(2501)), /5,000/);
 });
 
-test('German uses Vokhanhbel Achernar; unsupported languages are rejected', () => {
+test('German uses Achernar; unsupported languages are rejected', () => {
   assert.deepEqual(speechRequest('Eine Anfrage kommt an.', 'de-DE'), {
     input: { text: 'Eine Anfrage kommt an.' },
     voice: { languageCode: 'de-DE', name: 'de-DE-Chirp3-HD-Achernar' },

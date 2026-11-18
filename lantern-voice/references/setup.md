@@ -1,15 +1,14 @@
 # Setup and commands
 
-This skill uses the same Google Cloud TTS API and English/German voices as Vokhanhbel.
-It does not depend on that app or invoke another skill. It shares the adjacent
+This skill uses Google Cloud Text-to-Speech with English and German Chirp 3 HD voices.
+It shares the adjacent
 `lantern/scripts/lantern.sh` installer and its upstream pin; keep both directories
 when syncing `cb-skills`.
 
 ## Install on a machine
 
 Prerequisites: Bash, Git, tar, Node.js 24+, npm, and `gcloud`.
-On Debian/Ubuntu, `~/cb-dotfiles/install.sh` installs `gcloud`, or run only
-`~/cb-dotfiles/scripts/install-gcloud.sh`. On other systems, use
+Install `gcloud` using
 [Google's CLI installer](https://docs.cloud.google.com/sdk/docs/install-sdk).
 From `cb-skills`:
 
@@ -41,8 +40,8 @@ In your own terminal, run:
 gcloud init --console-only
 ```
 
-Follow Google's browser instructions and select the existing project used for
-speech, such as Vokhanhbel's. This configures the normal CLI login and project;
+Follow Google's browser instructions and select the Google Cloud project to use
+for speech. This configures the normal CLI login and project;
 no separate application-default login or downloaded private key is needed.
 The project must have Cloud Text-to-Speech enabled and billing configured.
 Reusing a project does not require copying its production credentials.
@@ -50,7 +49,7 @@ Reusing a project does not require copying its production credentials.
 Check the selected project with `gcloud config get-value project`. By default,
 the helper uses that project for the request's quota/billing header. To keep
 speech on a fixed project regardless of other CLI work, set the non-secret
-`LANTERN_VOICE_GOOGLE_PROJECT` variable. That export may live in `cb-dotfiles`.
+`LANTERN_VOICE_GOOGLE_PROJECT` variable in your shell environment.
 The helper only reads CLI settings; it never changes your account or project.
 
 When missing speech needs generating, the helper captures
@@ -113,7 +112,7 @@ voice and format. A corrupt cached file is reported rather than silently replace
 ## Timing and output
 
 English uses `en-US-Chirp3-HD-Despina`; German uses `de-DE-Chirp3-HD-Achernar`.
-Audio is **mono 24 kHz LINEAR16 WAV**, rather than Vokhanhbel's MP3 output. WAV gives exact sample-based durations
+Audio is **mono 24 kHz LINEAR16 WAV**. WAV gives exact sample-based durations
 and lets the builder insert silence without FFmpeg or another decoder.
 
 A scene wrapper extends each step to fit its clip plus a 0.2-second tail, rounded

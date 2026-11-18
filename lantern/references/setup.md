@@ -2,7 +2,7 @@
 
 The skill and its pinned upstream revision live in `cb-skills/lantern`. Source,
 `node_modules`, browsers, and generated explainers stay outside the config repo.
-No `cb-dotfiles` change, global npm package, or shell alias is needed.
+No dotfiles change, global npm package, or shell alias is needed.
 
 ## New machine
 
