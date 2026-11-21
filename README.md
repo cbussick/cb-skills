@@ -136,6 +136,18 @@ These skills live in top-level folders containing a `SKILL.md` file. Edit and
 commit them like any other files. After adding or removing one, run
 `./scripts/install.sh`.
 
+### Clean up (manual only)
+
+`clean-up` inventories and removes a task's disposable artifacts and temporary
+processes, including resources outside the repository. It protects user-provided
+files, shared resources, review deliverables, and unfinished work, then verifies
+and reports what remains. Repository rules still govern branch/worktree removal;
+the skill does not authorize merging or pushing.
+
+Use `/skill:clean-up` in Pi, `/clean-up` in Claude Code, or `$clean-up` in Codex.
+Optionally name the task or repository to clean. Run `./scripts/install.sh` after
+adding it and reload or start a new agent session to discover it.
+
 ### Lantern technical explainers (manual only)
 
 `lantern` creates animated, step-through explanations of code, plans,

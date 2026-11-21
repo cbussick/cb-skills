@@ -1,0 +1,6 @@
+interface:
+  display_name: "Clean Up"
+  short_description: "Safely remove task-owned temporary resources"
+  default_prompt: "Use $clean-up to inventory and remove this task's disposable artifacts and processes, preserve protected resources, and verify what remains."
+policy:
+  allow_implicit_invocation: false
