@@ -65,11 +65,11 @@ folders managed by `install.sh` and can conflict with its links.
 
 ### Local skill policy
 
-`skills-policy.json` lists downloaded skills that should be manual-only. Anatomy
-is currently the only entry. `scripts/apply-skill-policy.mjs` sets
+`skills-policy.json` records generated overrides for downloaded skills. Its
+`manualOnly` list currently contains only Anatomy. `scripts/apply-skill-policy.mjs` sets
 `disable-model-invocation: true` in their `SKILL.md` frontmatter and
 `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, creating that
-metadata file if needed. Skill bodies and other metadata are preserved.
+metadata file if needed. Other metadata and upstream body text are preserved.
 
 The installer calls this script before creating links. The update wrapper also
 calls it after the Skills CLI returns, even on failure, because a partial update
@@ -79,10 +79,26 @@ policy. The script supports block-style YAML for these settings, not inline
 policy mappings or aliases.
 
 The patch script and policy are tracked; downloaded copies remain ignored. The
-lockfile continues to describe upstream content, not our local invocation flags.
-To make a listed skill automatic again, remove its policy entry, restore that
-skill's upstream copy, and rerun the installer. Removing the entry alone does not
-undo an already applied patch.
+lockfile continues to describe upstream content, not our local overrides.
+To remove an override, remove its policy entry, restore that skill's upstream
+copy, and rerun the installer. Removing the entry alone does not undo an already
+applied patch.
+
+The `dependencyApproval` list covers our nine Emil UI skills. The same script
+inserts a marked local guidance section after their frontmatter. It requires
+explicit approval for a proposed new or replacement project dependency; a feature
+request alone is not approval. Reusing installed libraries needs no additional
+approval. It also places project conventions above the playbook, asks for the
+smallest appropriate workflow, and requires honest reporting of visual checks.
+These rules travel with the global skill links and are reapplied after updates.
+They guide agent behavior; they are not a package-manager permission mechanism.
+
+We install `animate`, `review-animations`, `improve-animations`,
+`find-animation-opportunities`, `prototype`, `choreograph`, `pick-ui-library`,
+`break-ui`, and `learn-taste` from Emil's collection. Their upstream invocation
+defaults are unchanged: `review-animations`, `prototype`, `pick-ui-library`, and
+`learn-taste` are manual-only. Cross-skill references can still direct an agent
+to read a manual-only skill as reference material.
 
 Invoke Anatomy explicitly with `/skill:anatomy` in Pi, `/anatomy` in Claude Code,
 or `$anatomy` in Codex. Reload or start a new agent session after changing policy.

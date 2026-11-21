@@ -66,6 +66,22 @@ export function manualCodexPolicy(text) {
   return lines.join(newline);
 }
 
+// Generated local guidance travels with the skill without changing invocation flags.
+export function dependencyApprovalGuidance(text) {
+  const newline = newlineOf(text);
+  const lines = text.split(newline);
+  const end = lines.findIndex((line, index) => index > 0 && line === '---');
+  if (lines[0] !== '---' || end < 0) fail('SKILL.md must start with YAML frontmatter.');
+  const marker = '<!-- cb-skills:dependency-approval -->';
+  if (text.includes(marker)) return text;
+  lines.splice(end + 1, 0, '', marker,
+    '## Local UI workflow policy', '',
+    'Use this playbook as guidance within the project’s conventions. Choose the smallest workflow that fits the task, and verify the rendered result when tools permit; disclose checks you could not run.', '',
+    'Before adding or replacing a project dependency, explain the proposed library and why it is needed, then obtain explicit user approval for that dependency. A request to build a UI feature alone is not dependency approval. Reusing an already installed library needs no additional approval.',
+    '<!-- /cb-skills:dependency-approval -->');
+  return lines.join(newline);
+}
+
 async function assertContained(path, root) {
   let actual;
   try {
@@ -82,16 +98,20 @@ async function assertContained(path, root) {
 
 export async function applySkillPolicy(repoRoot) {
   const policy = JSON.parse(await readFile(join(repoRoot, 'skills-policy.json'), 'utf8'));
-  if (!policy || Object.keys(policy).some((key) => key !== 'manualOnly') || !Array.isArray(policy.manualOnly)) {
-    fail('skills-policy.json must contain only a manualOnly array.');
+  if (!policy || Object.keys(policy).some((key) => !['manualOnly', 'dependencyApproval'].includes(key)) || !Array.isArray(policy.manualOnly) || (policy.dependencyApproval !== undefined && !Array.isArray(policy.dependencyApproval))) {
+    fail('skills-policy.json must contain a manualOnly array and an optional dependencyApproval array.');
   }
-  if (new Set(policy.manualOnly).size !== policy.manualOnly.length) fail('Duplicate names in manualOnly.');
+  const dependencyApproval = policy.dependencyApproval ?? [];
+  for (const [key, names] of Object.entries({ manualOnly: policy.manualOnly, dependencyApproval })) {
+    if (new Set(names).size !== names.length) fail(`Duplicate names in ${key}.`);
+  }
   const lock = JSON.parse(await readFile(join(repoRoot, 'skills-lock.json'), 'utf8'));
   const managedRoot = await realpath(join(repoRoot, '.agents/skills'));
   const changes = [];
 
-  for (const name of policy.manualOnly) {
-    if (typeof name !== 'string' || name.length > 64 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) fail('Invalid skill name in manualOnly.');
+  const names = [...new Set([...policy.manualOnly, ...dependencyApproval])];
+  for (const name of names) {
+    if (typeof name !== 'string' || name.length > 64 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) fail('Invalid skill name in policy.');
     if (!Object.hasOwn(lock.skills, name)) fail(`${name} is not declared in skills-lock.json.`);
     const skillRoot = join(managedRoot, name);
     const skillPath = join(skillRoot, 'SKILL.md');
@@ -102,8 +122,11 @@ export async function applySkillPolicy(repoRoot) {
       if (error.code !== 'ENOENT') throw error;
       fail(`${name} is missing. Restore locked skills before applying policy.`);
     }
-    changes.push({ path: skillPath, before: original, after: manualFrontmatter(original) });
+    let patched = policy.manualOnly.includes(name) ? manualFrontmatter(original) : original;
+    if (dependencyApproval.includes(name)) patched = dependencyApprovalGuidance(patched);
+    changes.push({ path: skillPath, before: original, after: patched });
 
+    if (!policy.manualOnly.includes(name)) continue;
     const codexPath = join(skillRoot, 'agents/openai.yaml');
     await assertContained(codexPath, await realpath(skillRoot));
     let codex = '';
@@ -121,13 +144,13 @@ export async function applySkillPolicy(repoRoot) {
     written++;
   }
 
-  return { skills: policy.manualOnly.length, written };
+  return { skills: names.length, written };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   applySkillPolicy(repoRoot).then(({ skills, written }) => {
-    console.log(`Applied manual-only policy to ${skills} skill(s); ${written} file(s) changed.`);
+    console.log(`Applied local policy to ${skills} skill(s); ${written} file(s) changed.`);
   }).catch((error) => {
     console.error(error.message);
     process.exitCode = 1;

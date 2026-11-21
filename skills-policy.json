@@ -1,3 +1,14 @@
 {
-  "manualOnly": ["anatomy"]
+  "manualOnly": ["anatomy"],
+  "dependencyApproval": [
+    "animate",
+    "review-animations",
+    "improve-animations",
+    "find-animation-opportunities",
+    "prototype",
+    "choreograph",
+    "pick-ui-library",
+    "break-ui",
+    "learn-taste"
+  ]
 }

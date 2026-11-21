@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { manualFrontmatter, manualCodexPolicy, applySkillPolicy } from './apply-skill-policy.mjs';
+import { manualFrontmatter, manualCodexPolicy, dependencyApprovalGuidance, applySkillPolicy } from './apply-skill-policy.mjs';
 
 const source = '---\nname: anatomy\ndescription: Draw an instrument.\n---\n\n# Anatomy\n\nKeep the body unchanged.\n';
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
@@ -88,9 +88,48 @@ test('invalid names, unknown skills, and escaping symlinks are refused', async (
   assert.equal(await readFile(join(skill, 'SKILL.md'), 'utf8'), source);
 });
 
+test('dependency approval guidance preserves upstream content and invocation defaults', async (t) => {
+  const { root, skill } = await fixture(t);
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: [], dependencyApproval: ['anatomy'] }));
+  assert.deepEqual(await applySkillPolicy(root), { skills: 1, written: 1 });
+  const patched = await readFile(join(skill, 'SKILL.md'), 'utf8');
+  assert.match(patched, /obtain explicit user approval for that dependency/);
+  assert.ok(!patched.includes('disable-model-invocation'));
+  assert.ok(patched.endsWith('\n\n# Anatomy\n\nKeep the body unchanged.\n'));
+  assert.equal(dependencyApprovalGuidance(patched), patched);
+  assert.deepEqual(await applySkillPolicy(root), { skills: 1, written: 0 });
+  const manual = manualFrontmatter(source);
+  assert.ok(dependencyApprovalGuidance(manual).includes('disable-model-invocation: true'));
+  const crlf = source.replaceAll('\n', '\r\n');
+  assert.equal(dependencyApprovalGuidance(crlf), dependencyApprovalGuidance(source).replaceAll('\n', '\r\n'));
+  assert.throws(() => dependencyApprovalGuidance('no frontmatter'), /frontmatter/);
+});
+
+test('overlapping policies compose without duplicate writes', async (t) => {
+  const { root, skill } = await fixture(t);
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: ['anatomy'], dependencyApproval: ['anatomy'] }));
+  assert.deepEqual(await applySkillPolicy(root), { skills: 1, written: 2 });
+  const patched = await readFile(join(skill, 'SKILL.md'), 'utf8');
+  assert.match(patched, /disable-model-invocation: true/);
+  assert.match(patched, /obtain explicit user approval/);
+  assert.deepEqual(await applySkillPolicy(root), { skills: 1, written: 0 });
+});
+
+test('dependency approval validates all targets before writing', async (t) => {
+  const { root, skill } = await fixture(t);
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: [], dependencyApproval: ['anatomy', 'unknown'] }));
+  await assert.rejects(applySkillPolicy(root), /not declared/);
+  assert.equal(await readFile(join(skill, 'SKILL.md'), 'utf8'), source);
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: [], dependencyApproval: ['anatomy', 'anatomy'] }));
+  await assert.rejects(applySkillPolicy(root), /Duplicate/);
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: [], dependencyApproval: true }));
+  await assert.rejects(applySkillPolicy(root), /array/);
+});
+
 async function workflowFixture(t) {
   const result = await fixture(t);
   const { root } = result;
+  await writeFile(join(root, 'skills-policy.json'), JSON.stringify({ manualOnly: ['anatomy'], dependencyApproval: ['anatomy'] }));
   await mkdir(join(root, 'scripts'));
   for (const name of ['apply-skill-policy.mjs', 'install.sh', 'update.sh']) {
     await copyFile(join(scriptDirectory, name), join(root, 'scripts', name));
@@ -115,6 +154,7 @@ test('install and update share the policy script and link only the patched downl
   assert.equal(update.status, 0, update.stderr);
   assert.equal((await readFile(join(root, 'update.log'), 'utf8')).trim(), '--yes skills@latest update -p');
   assert.match(await readFile(join(skill, 'SKILL.md'), 'utf8'), /disable-model-invocation: true/);
+  assert.match(await readFile(join(skill, 'SKILL.md'), 'utf8'), /obtain explicit user approval/);
   assert.equal(await readlink(join(env.HOME, '.agents/skills/anatomy')), skill);
   assert.equal(await readlink(join(env.HOME, '.claude/skills/anatomy')), skill);
 });
@@ -124,4 +164,5 @@ test('failed updates still reapply policy and preserve the update failure status
   const result = spawnSync('bash', [join(root, 'scripts/update.sh')], { env: { ...env, UPDATE_TEST_STATUS: '7' }, encoding: 'utf8' });
   assert.equal(result.status, 7, result.stderr);
   assert.match(await readFile(join(skill, 'SKILL.md'), 'utf8'), /disable-model-invocation: true/);
+  assert.match(await readFile(join(skill, 'SKILL.md'), 'utf8'), /obtain explicit user approval/);
 });
