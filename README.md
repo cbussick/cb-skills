@@ -148,6 +148,14 @@ Use `/skill:clean-up` in Pi, `/clean-up` in Claude Code, or `$clean-up` in Codex
 Optionally name the task or repository to clean. Run `./scripts/install.sh` after
 adding it and reload or start a new agent session to discover it.
 
+### Obsidian Vault Read
+
+1. Clone [cb-obsidian-vault-access](https://github.com/cbussick/cb-obsidian-vault-access)
+   and run `npm ci && npm run build` in that checkout.
+2. Copy `obsidian-vault-read/.env.example` to `obsidian-vault-read/.env`. Set
+   `OBSIDIAN_VAULT_PATH` to your existing vault and `OBSIDIAN_VAULT_CLI_DIR` to
+   the CLI checkout. Use absolute paths for both.
+
 ### Lantern technical explainers (manual only)
 
 `lantern` creates animated, step-through explanations of code, plans,
