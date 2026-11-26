@@ -180,12 +180,6 @@
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "29198ea31f2a2341441fcffda9f31899dc630d51a849f2fd2ef759cc72b0181d"
     },
-    "statechart": {
-      "source": "cursor/plugins",
-      "sourceType": "github",
-      "skillPath": "harness/pstack/claude-code/skills/statechart/SKILL.md",
-      "computedHash": "3b9a1f08cfc53c73ee8735f2392dbbd777e1c2c17fa89a22a9dddf1cd147677c"
-    },
     "tdd": {
       "source": "mattpocock/skills",
       "ref": "v1.3.1",
